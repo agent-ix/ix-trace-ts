@@ -1,7 +1,7 @@
 {
   "name": "@agent-ix/ix-trace-ts",
   "description": "vitest reporter and trace() helper that emit requirement trace ids into results",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "AGPL-3.0-or-later",
   "type": "module",
   "files": [

@@ -21,11 +21,7 @@ npm install @agent-ix/ix-trace-ts
 
 `vitest` `^4.1.2` is an optional peer dependency. Install it in any project that uses `trace()` or the reporter.
 
-To build from a clone of [ix-trace-ts](https://github.com/agent-ix/ix-trace-ts), run `pnpm install`, then the targets under Building and testing.
-
 ## Usage
-
-The package has two entries. `trace` and `TraceReporter` come from `@agent-ix/ix-trace-ts/vitest`, the only entry that loads vitest. The package root exports `implementing` only and imports no other package, so production code that uses it runs where no test runner is installed.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/agent-ix/ix-trace-ts/main/docs/images/entries-dark.svg">
@@ -46,7 +42,9 @@ export default {
 Call `trace()` in a test body:
 
 ```ts
+import { it } from "vitest";
 import { trace } from "@agent-ix/ix-trace-ts/vitest";
+
 it("verifies the thing", () => {
   trace("FR-001-AC-1");
 });
@@ -84,23 +82,22 @@ When vitest runs a file that uses decorators, set `"experimentalDecorators": tru
 
 ### `@agent-ix/ix-trace-ts`
 
-| Export                         | Description                                                                                                                                                                                           |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `implementing(first, ...rest)` | Declares the ids the marked class, method, getter, setter or function implements. Returns a decorator and wrapper (`Implementing`). Throws `TypeError` when no id is given or an id is not id-shaped. |
+| Export                         | Description                                                                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `implementing(first, ...rest)` | Declares the ids the marked class, method, getter, setter or function implements. Returns a function that works as a decorator and as a wrapper. Throws `TypeError` when no id is given or an id is not id-shaped. |
 
 An id is id-shaped when it is a kind followed by hyphen-separated alphanumeric segments, at least one containing a digit, for example `FR-007-AC-1`.
 
 ### `@agent-ix/ix-trace-ts/vitest`
 
-| Export                 | Description                                                                                                                                                          |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `trace(...ids)`        | Declares the ids the running test verifies. Does nothing unless `QUIRE_TRACE_EMIT=1`. Throws outside a running test and in a concurrent test.                        |
-| `TraceReporter`        | vitest reporter, also the default export. Without `QUIRE_TRACE_EMIT=1` it is vitest's own JUnit reporter. With it, it writes the JUnit file with `trace` properties. |
-| `TraceReporterOptions` | Constructor options for `TraceReporter`.                                                                                                                             |
+| Export          | Description                                                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trace(...ids)` | Declares the ids the running test verifies. Does nothing unless `QUIRE_TRACE_EMIT=1`. Throws outside a running test and in a concurrent test.                        |
+| `TraceReporter` | vitest reporter, also the default export. Without `QUIRE_TRACE_EMIT=1` it is vitest's own JUnit reporter. With it, it writes the JUnit file with `trace` properties. |
 
-`TraceReporterOptions` has one field, `outputFile`, the path of the JUnit file. It defaults to vitest's `outputFile` config. When neither is set, the XML is printed to the log.
+The `TraceReporter` constructor takes an optional `{ outputFile }`, the path of the JUnit file. It defaults to vitest's `outputFile` config. When neither is set, the XML is printed to the log.
 
-With `QUIRE_TRACE_EMIT=1`, the reporter writes one `<testcase>` per test. `name` and `classname` are the title as written in source (for `it.each`, the template title), `file` is the repo-relative path, and each distinct id appears once in the `trace` property, comma-separated. jest is unsupported.
+With `QUIRE_TRACE_EMIT=1`, the reporter writes one `<testcase>` per test. `name` and `classname` are the title as written in source (for `it.each`, the template title), `file` is the test file's path relative to vitest's `root`, and each distinct id appears once in the `trace` property, comma-separated. jest is unsupported.
 
 ### Environment
 

@@ -7,7 +7,7 @@ Regenerate from the repository root with the agent-ix/dev-tools skill:
     python3 <dev-tools>/skills/docs-figures/scripts/render.py docs/images/figures.py
 
 Add --check to confirm the committed SVGs are current. Values are read from this
-repository: package.json, src/trace.ts, src/vitest.ts and src/index.ts.
+repository: package.json, src/trace.ts, src/vitest.ts, src/index.ts and src/implementing.ts (the root entry's imports).
 """
 
 import json
@@ -26,7 +26,11 @@ EMIT_ENV = re.search(r'EMIT_ENV = "([A-Z_]+)"', TRACE_SRC).group(1)
 META_KEY = re.search(r'TRACE_META_KEY = "(\w+)"', TRACE_SRC).group(1)
 EXPORTS = PACKAGE["exports"]
 PEER = PACKAGE["peerDependencies"]["vitest"]
-HAS_DEPENDENCIES = bool(PACKAGE.get("dependencies"))
+IMPLEMENTING_SRC = (ROOT / "src" / "implementing.ts").read_text()
+INDEX_SRC = (ROOT / "src" / "index.ts").read_text()
+IMPORTS = re.findall(r'^\s*(?:import|export)\b[^;]*?\bfrom\s+"([^"]+)"', IMPLEMENTING_SRC + INDEX_SRC, re.M)
+IMPORTS += re.findall(r'^\s*import\s+"([^"]+)"', IMPLEMENTING_SRC + INDEX_SRC, re.M)
+EXTERNAL = [m for m in IMPORTS if not m.startswith(".")]
 
 
 def exported(path):
@@ -80,7 +84,7 @@ def entries():
     """The two package entries and what each one loads."""
     root_path = EXPORTS["."]["default"].lstrip("./")
     vitest_path = EXPORTS["./vitest"]["default"].lstrip("./")
-    root_load = "imports no other package" if not HAS_DEPENDENCIES else "has dependencies"
+    root_load = "imports no other package" if not EXTERNAL else "imports " + ", ".join(EXTERNAL)
     f = Figure(
         "entries",
         980,
