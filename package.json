@@ -54,7 +54,7 @@
     "@vitest/coverage-v8": "^4.1.2",
     "eslint": "^9.25.1",
     "eslint-plugin-prettier": "^5.2.6",
-    "pnpm": "^10.10.0",
+    "pnpm": "^12.17.0",
     "prettier": "^3.5.3",
     "typescript": "^5.9.3",
     "vite": "^8.0.3",
