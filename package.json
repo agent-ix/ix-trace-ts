@@ -39,7 +39,6 @@
     "docker:build": "docker build -t ghcr.io/agent-ix/ix-trace-ts .",
     "publish:dry-run": "pnpm publish --dry-run",
     "prepublishOnly": "pnpm run build",
-    "tags": "npm dist-tag ls @agent-ix/ix-trace-ts --registry http://npm.ix/ || echo '(package not found or registry unavailable)'",
     "pkg:add": "pnpm add",
     "pkg:add-dev": "pnpm add -D",
     "pkg:update": "pnpm update",
@@ -71,7 +70,8 @@
     }
   },
   "publishConfig": {
-    "registry": "http://npm.ix/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "repository": {
     "type": "git",

@@ -7,7 +7,7 @@ ids it implements. jest is unsupported.
 
 Emission is enabled by setting `QUIRE_TRACE_EMIT=1`.
 
-Status: private, pre-release. The package is not published anywhere.
+Status: pre-release. Published to public npm as `@agent-ix/ix-trace-ts` via Trusted Publishing.
 
 ## Usage
 
