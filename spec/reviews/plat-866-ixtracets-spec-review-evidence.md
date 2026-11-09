@@ -28,3 +28,12 @@ Examined: FR-002-AC-1, FR-002-AC-2, FR-002-AC-3, FR-002-AC-4, FR-002-AC-5, FR-00
 ## Verdict
 
 Changes requested: one medium finding (how the AC-5 collection test runs) must be fixed or dispositioned before merge.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | AC-5 and TC-018 now name the subprocess or worker execArgv, fail (never skip) when gc is not a function, and yield before gc() and again before deref(). |
+| FND-002 | fixed | The vacuous package-exports clause is gone; AC-5 compares own names and symbols of each marked object and of implementing itself, and AC-14 checks the root namespace keys as a real export-surface assertion. |

@@ -28,3 +28,12 @@ Examined: FR-002-IMPORT, FR-002-SPELLINGS, FR-002-FORMS, FR-002-TYPING, FR-002-A
 ## Verdict
 
 Not mergeable: one high finding (import posture versus the single package entry) and one medium finding (decorator positions versus FR-062) must be fixed.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | FR-002 Package entries pins root = implementing only with no vitest in its graph and ./vitest for trace and TraceReporter; FR-001 gains a Package entry section and AC-14; spec.md Interfaces and README name the subpath; AC-14..16 and TC-027..029 test it. |
+| FND-002 | fixed | Accepted positions now match FR-062 (class, method, get/set accessor); field and parameter are compile-time errors under both conventions; a class expression type-checks and binds nothing; AC-13/TC-026 test it. |

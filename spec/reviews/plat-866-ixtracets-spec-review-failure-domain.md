@@ -27,3 +27,11 @@ Examined: FR-002-RETURN, FR-002-AC-4, FR-002-AC-6, FR-002-AC-11, FR-002-AC-12. C
 ## Verdict
 
 No blocking findings. The low finding should be fixed in the same PR.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | The zero-argument case now throws TypeError (AC-9/TC-022), and the callback / stray-argument case is a stated limit outside the construct. Both cases are now specified, which was the defect. |

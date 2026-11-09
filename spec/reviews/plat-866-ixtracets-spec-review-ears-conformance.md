@@ -27,3 +27,11 @@ Examined: FR-002, FR-002-RETURN, FR-002-IMPORT, StR-002. Context only: none.
 ## Verdict
 
 No blocking findings. The low finding should be fixed in the same PR.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | eb6d7e0 states the return rule as SHALL bullets and the package entries as SHALL statements. |

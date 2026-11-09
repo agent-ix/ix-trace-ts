@@ -66,8 +66,11 @@ The returned function SHALL change nothing it is given.
 - It SHALL NOT wrap, replace or mutate the declaration, record it in a registry, or
   read the environment, so a marked declaration is identical to the unmarked one.
 
-**Stated limit.** The result is chosen by argument count alone, because the
-decorator calling conventions and the wrapper call cannot be told apart otherwise.
+**Stated limit.** The result is chosen by argument count alone. That is a
+deliberate simplification and not an impossibility: a standard decorator receives a
+context object with a `kind` and a legacy decorator receives a key and a descriptor,
+which a callback's `(fn, index, array)` does not, so the conventions could be told
+apart by inspecting the arguments, and this construct does not.
 Used as a callback (`ids.map(implementing("A-1"))`) or given a stray second
 argument, the returned function returns `undefined` or its first argument as the
 count dictates and raises no error. Such a use is outside the construct.

@@ -29,3 +29,13 @@ Examined: FR-002, US-002-NOTES, FR-002-SPELLINGS, FR-002-AC-1, FR-002-AC-2, FR-0
 ## Verdict
 
 No blocking findings. The low findings should be fixed in the same PR.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | US-002 Notes now say double-quoted. |
+| FND-002 | fixed | AC-9 now states the arity rule of the returned function (zero, one, two arguments), distinct from AC-4. |
+| FND-003 | fixed | AC-2 and AC-3 now name Object.getOwnPropertyDescriptor(Class.prototype, name) and the compared attributes. |

@@ -27,3 +27,11 @@ Examined: FR-002, StR-002, US-002, FR-002-AC-1, FR-002-AC-2, FR-002-AC-3, FR-002
 ## Verdict
 
 Changes requested: rebase onto main to resolve the spec/tests.md conflict. The checklist is otherwise clean.
+
+## Dispositions
+
+Round 1, verified against head eb6d7e0 (fix commit eb6d7e0, merge 56eaf94).
+
+| FND | Outcome | Reason |
+| --- | --- | --- |
+| FND-001 | fixed | Merge commit 56eaf94 merges origin/main and keeps main's FR-001 statuses beside the FR-002 rows; GitHub reports mergeable=MERGEABLE at eb6d7e0. |
