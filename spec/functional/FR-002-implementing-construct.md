@@ -92,7 +92,8 @@ The static side resolves no import. The package documents one namespace import,
 wrapper form, as the module declaration pins them
 ([spec-artifacts-process FR-004](ix://agent-ix/spec-artifacts-process/FR-004)).
 A renamed import (`import { implementing as impl }`, or another namespace name)
-works at run time and is not bound statically.
+works at run time and is not bound statically and raises no finding, because the
+shipped patterns are anchored at the start of the candidate.
 
 ### Typing across decorator conventions
 
