@@ -7,10 +7,14 @@ on:
 
 permissions:
   contents: read
-  id-token: write # OIDC token for npm Trusted Publishing (no-op for token-based GH Packages)
+  id-token: write # OIDC token for npm Trusted Publishing
 
 jobs:
   ci:
     uses: agent-ix/nodejs-actions/.github/workflows/release.yml@main
+    with:
+      npm_registry: https://registry.npmjs.org
+      trusted_publish: true
+      node_version: "22" # OIDC Trusted Publishing requires Node >= 22.14
     secrets:
-      NPM_REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # first-publish fallback only

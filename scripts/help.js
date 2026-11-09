@@ -51,8 +51,6 @@ console.log("  pnpm run docker:build  Build Docker image");
 console.log(
   "  pnpm run publish:dry-run  Test publish without actually publishing",
 );
-console.log("  pnpm run publish:local Publish to local npm.ix registry");
-console.log("  pnpm run tags          Show dist-tags on npm.ix\n");
 
 console.log("💡 TIPS");
 console.log('  • Run "pnpm run" to see all available scripts');
