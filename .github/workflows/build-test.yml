@@ -1,0 +1,10 @@
+name: CI
+
+# Manual only. Never on push, pull request, commit, or merge.
+on:
+  workflow_dispatch:
+jobs:
+  ci:
+    uses: agent-ix/nodejs-actions/.github/workflows/build-test.yml@main
+    secrets:
+      NPM_REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
