@@ -71,7 +71,7 @@ make lint
 
 ## Contributing
 
-See `CONTRIBUTING.md`, `CLA.md` and `CONTENT_RIGHTS.md`.
+See the [Agent IX contributing guide and CLA](https://github.com/agent-ix/.github) and `CONTENT_RIGHTS.md`.
 
 ## Licence
 
