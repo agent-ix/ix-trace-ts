@@ -84,6 +84,16 @@ no test runner is installed. The reporter of
 [FR-001](./FR-001-vitest-trace-helper-and-reporter.md) is a separate entry that only
 a vitest configuration loads.
 
+### Statically bound spellings
+
+The static side resolves no import. The package documents one namespace import,
+`import * as ixTrace from "@agent-ix/ix-trace-ts"`, and the spellings it binds are
+`implementing(...)` and `ixTrace.implementing(...)`, for both the decorator and the
+wrapper form, as the module declaration pins them
+([spec-artifacts-process FR-004](ix://agent-ix/spec-artifacts-process/FR-004)).
+A renamed import (`import { implementing as impl }`, or another namespace name)
+works at run time and is not bound statically.
+
 ### Typing across decorator conventions
 
 The returned function is typed to be accepted by a standard (TC39) decorator
@@ -115,7 +125,7 @@ module loads, where the Rust attribute is compile-time.
 | FR-002-AC-7 | Loading a module that uses `implementing` in a process in which `vitest` cannot be resolved succeeds, and `vitest` is not among the modules loaded afterwards. | Test |
 | FR-002-AC-8 | `implementing(...)` used on a test registration or on a `describe` callback changes neither the test's registration nor its recorded `trace` ids under `QUIRE_TRACE_EMIT=1`. | Test |
 | FR-002-AC-9 | A marked function and an unmarked function are the same object, so a call to the marked one adds no time: the median call time of 100,000 calls differs under 5% over at least five runs. | Test |
-| FR-002-AC-10 | A fixture module whose production class, method and wrapped arrow-valued const carry `implementing(...)` yields, through `quire coverage --json` under the module of `spec-artifacts-process`, one `implements` relation per declared id on each marked symbol and no `verifies` relation. | Test |
+| FR-002-AC-10 | A fixture module whose production class, method and wrapped arrow-valued const carry `implementing(...)` yields, through `quire coverage --json` under the module of `spec-artifacts-process`, one `implements` relation per declared id on each marked symbol and no `verifies` relation, for both `implementing(...)` and `ixTrace.implementing(...)`, while a renamed import binds nothing. | Test |
 
 ## Constraints
 
