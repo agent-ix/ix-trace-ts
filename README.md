@@ -8,6 +8,26 @@ Emission is enabled by setting `QUIRE_TRACE_EMIT=1`.
 
 Status: private, pre-release. The package is not published anywhere.
 
+## Usage
+
+```ts
+// vitest.config.ts
+import { TraceReporter } from "@agent-ix/ix-trace-ts";
+export default {
+  test: { reporters: [new TraceReporter({ outputFile: "junit.xml" })] },
+};
+```
+
+```ts
+import { trace } from "@agent-ix/ix-trace-ts";
+it("verifies the thing", () => {
+  trace("FR-001-AC-1");
+});
+```
+
+Run with `QUIRE_TRACE_EMIT=1` to add the `trace` property to the JUnit file.
+Without it the reporter writes vitest's plain JUnit output.
+
 ## Specification
 
 - Emitter contract: quoin FR-120.

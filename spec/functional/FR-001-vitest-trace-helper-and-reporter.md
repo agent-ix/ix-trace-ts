@@ -63,11 +63,11 @@ For each case the reporter writes as `name` and again as `classname` the
 the repo-relative `/`-separated path. vitest and jest register tests only through
 `it`/`test`, so there is no class-qualified form: the symbol is the title.
 
-| Registration shape | `name` and `classname` |
-| --- | --- |
-| `it`/`test` | The registered title exactly as written in source. An enclosing `describe` does not qualify it. |
-| `it.each`/`test.each` | The template title as written in source (for example `adds %s`), never the interpolated title; each case is its own `<testcase>`. |
-| Modifier shapes (`it.skipIf(c)(…)`, `it.only`, `it.skip`) | The registered title, once, whatever the modifier. |
+| Registration shape                                        | `name` and `classname`                                                                                                            |
+| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `it`/`test`                                               | The registered title exactly as written in source. An enclosing `describe` does not qualify it.                                   |
+| `it.each`/`test.each`                                     | The template title as written in source (for example `adds %s`), never the interpolated title; each case is its own `<testcase>`. |
+| Modifier shapes (`it.skipIf(c)(…)`, `it.only`, `it.skip`) | The registered title, once, whatever the modifier.                                                                                |
 
 vitest registers each `each` case under its interpolated title and keeps no template.
 The reporter therefore enables vitest's task location, reads the registration's
@@ -89,6 +89,15 @@ package cannot meet.
   an entry has no ids known at record time and discharges nothing. A test that calls
   `trace` before it throws or skips is recorded with its ids. Declaring ids at
   registration is outside this requirement.
+- **`--configLoader runner` is unsupported while emission is off.** The reporter
+  loads vitest's JUnit reporter lazily so that test workers importing `trace`
+  never load `vitest/node`. Under `--configLoader runner`, with the package
+  loaded from outside `node_modules`, that late import fails ("Vite module runner
+  has been closed") and no result file is written. The default config loader is
+  supported.
+- **E-7 is verified only by an opt-in run.** The cost check (FR-001-AC-10) times
+  wall-clock, which varies with host load, so it runs only with
+  `QUIRE_PERF_TESTS=1` on an uncontended host and is skipped otherwise.
 - **jest is unsupported.** jest runs test bodies in worker processes and hands its
   reporter an `AssertionResult` that has no user metadata field, so no channel
   carries a `trace()` call to the reporter. The requirement is revisited by
@@ -111,26 +120,26 @@ renames every case.
 
 ## Acceptance Criteria
 
-| ID | Criteria | Verification |
-| --- | --- | --- |
-| FR-001-AC-1 | `trace("FR-001-AC-1", "TC-041")` type-checks as an exported function accepting string ids, and a call with a non-string argument is a compile-time error. | Test |
-| FR-001-AC-2 | While `QUIRE_TRACE_EMIT` is unset or not `1`, the helper records nothing, the reporter writes no `trace` property, the suite's runner results equal those of a run without the package, and the package has no runtime dependency beyond the runner. | Test |
-| FR-001-AC-3 | While enabled, a test that calls `trace` with several ids, or calls it more than once, carries each distinct id once in its `trace` property; a test that did not call it carries none. | Test |
-| FR-001-AC-4 | While enabled, every id written was an argument of a `trace` call in that test; an id is never inferred from a title or file name. | Test |
-| FR-001-AC-5 | While enabled, an `it` inside two nested `describe` blocks reports its bare title, and an `it.each` with two cases yields two `<testcase>` elements both named by the template title; for each, `name` equals `classname`, `file` is the repo-relative path, and all three equal what `quire coverage --json` reports for the same fixture. | Test |
-| FR-001-AC-6 | While enabled, `it.skipIf(true)(…)`, `it.only` and `it.skip` registrations each report their registered title once with the runner's outcome (`skip` for a skipped one), and a test skipped by its modifier carries no ids and discharges nothing. | Test |
-| FR-001-AC-7 | A test that calls `trace` and then throws or fails an assertion is recorded `fail` with its ids; the outcome written is always the runner's. | Test |
-| FR-001-AC-8 | Under vitest's default parallel execution across files, each tagged test appears once with exactly its own ids, none mixed with another test's; while enabled, `trace()` called in an `it.concurrent` test, and in a test that inherits concurrency from `describe.concurrent`, throws an error stating the call was made in a concurrent test. | Test |
-| FR-001-AC-9 | The result file is written by the reporter during the run; no sidecar file is merged and no step after vitest exits rewrites names or ids. | Test |
-| FR-001-AC-10 | While enabled, a 500-test tagged suite adds under 5% to the median wall-clock time of the same suite with emission disabled, over at least five runs. | Test |
-| FR-001-AC-11 | A real vitest suite run with emission enabled produces a result file that `quoin evidence record` accepts and whose obligation is bound; the same suite with its tagged test made to fail yields a failing entry and binds nothing. | Test |
-| FR-001-AC-12 | While enabled, an `it.each` whose template cannot be recovered from the source at the registration's location (held in a variable or built from an expression) fails the run with an error naming the test, and the reporter writes no interpolated title as the symbol. | Test |
-| FR-001-AC-13 | While `QUIRE_TRACE_EMIT` is unset or not `1`, a project configured with the reporter still gets a JUnit result file equal to the plain JUnit result without the reporter, with no `trace` property; the reporter never writes nothing. | Test |
+| ID           | Criteria                                                                                                                                                                                                                                                                                                                                        | Verification |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
+| FR-001-AC-1  | `trace("FR-001-AC-1", "TC-041")` type-checks as an exported function accepting string ids, and a call with a non-string argument is a compile-time error.                                                                                                                                                                                       | Test         |
+| FR-001-AC-2  | While `QUIRE_TRACE_EMIT` is unset or not `1`, the helper records nothing, the reporter writes no `trace` property, the suite's runner results equal those of a run without the package, and the package has no runtime dependency beyond the runner.                                                                                            | Test         |
+| FR-001-AC-3  | While enabled, a test that calls `trace` with several ids, or calls it more than once, carries each distinct id once in its `trace` property; a test that did not call it carries none.                                                                                                                                                         | Test         |
+| FR-001-AC-4  | While enabled, every id written was an argument of a `trace` call in that test; an id is never inferred from a title or file name.                                                                                                                                                                                                              | Test         |
+| FR-001-AC-5  | While enabled, an `it` inside two nested `describe` blocks reports its bare title, and an `it.each` with two cases yields two `<testcase>` elements both named by the template title; for each, `name` equals `classname`, `file` is the repo-relative path, and all three equal what `quire coverage --json` reports for the same fixture.     | Test         |
+| FR-001-AC-6  | While enabled, `it.skipIf(true)(…)`, `it.only` and `it.skip` registrations each report their registered title once with the runner's outcome (`skip` for a skipped one), and a test skipped by its modifier carries no ids and discharges nothing.                                                                                              | Test         |
+| FR-001-AC-7  | A test that calls `trace` and then throws or fails an assertion is recorded `fail` with its ids; the outcome written is always the runner's.                                                                                                                                                                                                    | Test         |
+| FR-001-AC-8  | Under vitest's default parallel execution across files, each tagged test appears once with exactly its own ids, none mixed with another test's; while enabled, `trace()` called in an `it.concurrent` test, and in a test that inherits concurrency from `describe.concurrent`, throws an error stating the call was made in a concurrent test. | Test         |
+| FR-001-AC-9  | The result file is written by the reporter during the run; no sidecar file is merged and no step after vitest exits rewrites names or ids.                                                                                                                                                                                                      | Test         |
+| FR-001-AC-10 | While enabled, a 500-test tagged suite adds under 5% to the median wall-clock time of the same suite with emission disabled, over at least five runs.                                                                                                                                                                                           | Test         |
+| FR-001-AC-11 | A real vitest suite run with emission enabled produces a result file that `quoin evidence record` accepts and whose obligation is bound; the same suite with its tagged test made to fail yields a failing entry and binds nothing.                                                                                                             | Test         |
+| FR-001-AC-12 | While enabled, an `it.each` whose template cannot be recovered from the source at the registration's location (held in a variable or built from an expression) fails the run with an error naming the test, and the reporter writes no interpolated title as the symbol.                                                                        | Test         |
+| FR-001-AC-13 | While `QUIRE_TRACE_EMIT` is unset or not `1`, a project configured with the reporter still gets a JUnit result file equal to the plain JUnit result without the reporter, with no `trace` property; the reporter never writes nothing.                                                                                                          | Test         |
 
 ## Constraints
 
-| ID | Constraint | Type | Validation |
-| --- | --- | --- | --- |
+| ID           | Constraint                                                                                                  | Type   | Validation |
+| ------------ | ----------------------------------------------------------------------------------------------------------- | ------ | ---------- |
 | FR-001-CON-1 | The package SHALL NOT merge, patch or rewrite a result file after vitest has written it (Quoin FR-120 E-8). | Design | Inspection |
 
 ## Dependencies
