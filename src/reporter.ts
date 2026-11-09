@@ -10,7 +10,7 @@ import type {
   Vitest,
 } from "vitest/node";
 
-import { recoverEachTemplate } from "./template";
+import { recoverEachTemplate, TemplateNotRecovered } from "./template";
 import { emissionEnabled, TRACE_META_KEY } from "./trace";
 
 export interface TraceReporterOptions {
@@ -196,9 +196,13 @@ function row(test: TestCase, file: string, source: string | undefined): Row {
 }
 
 function symbolOf(test: TestCase, source: string | undefined): string {
+  if (!(test as unknown as { task: { each?: boolean } }).task.each)
+    return test.name;
   const location = test.location;
-  if (!location || source === undefined) return test.name;
-  return (
-    recoverEachTemplate(source, location.line, location.column) ?? test.name
-  );
+  if (!location || source === undefined) {
+    throw new TemplateNotRecovered(
+      "the registration location or source is unavailable",
+    );
+  }
+  return recoverEachTemplate(source, location.line, location.column);
 }

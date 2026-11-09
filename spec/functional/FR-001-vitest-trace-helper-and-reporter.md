@@ -89,6 +89,12 @@ package cannot meet.
   an entry has no ids known at record time and discharges nothing. A test that calls
   `trace` before it throws or skips is recorded with its ids. Declaring ids at
   registration is outside this requirement.
+- **`--configLoader runner` is unsupported while emission is off.** The reporter
+  loads vitest's JUnit reporter lazily so that test workers importing `trace`
+  never load `vitest/node`. Under `--configLoader runner`, with the package
+  loaded from outside `node_modules`, that late import fails ("Vite module runner
+  has been closed") and no result file is written. The default config loader is
+  supported.
 - **jest is unsupported.** jest runs test bodies in worker processes and hands its
   reporter an `AssertionResult` that has no user metadata field, so no channel
   carries a `trace()` call to the reporter. The requirement is revisited by

@@ -115,12 +115,13 @@ export default { test: { reporters: [${reporter}], ${options.testConfig ?? ""} }
   );
   const env = { ...process.env };
   delete env.QUIRE_TRACE_EMIT;
+  delete env.CI;
   env.VITE_CONFIG_NATIVE_IGNORE_WARNING = "true";
   if (options.emit !== undefined) env.QUIRE_TRACE_EMIT = options.emit;
   return new Promise((done) => {
     execFile(
       process.execPath,
-      [VITEST, "run", "--root", dir],
+      [VITEST, "run", "--root", dir, "--allowOnly"],
       { env, cwd: dir, maxBuffer: 64 * 1024 * 1024 },
       (error, stdout, stderr) => {
         let xml: string | undefined;

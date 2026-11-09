@@ -1,16 +1,6 @@
 /** Why a title could not be read from source. */
 export class TemplateNotRecovered extends Error {}
 
-const ESCAPES: Record<string, string> = {
-  n: "\n",
-  t: "\t",
-  r: "\r",
-  b: "\b",
-  f: "\f",
-  v: "\v",
-  "0": "\0",
-};
-
 function offsetOf(source: string, line: number, column: number): number {
   let offset = 0;
   for (let l = 1; l < line; l++) {
@@ -19,34 +9,6 @@ function offsetOf(source: string, line: number, column: number): number {
     offset = next + 1;
   }
   return offset + column - 1;
-}
-
-/** Index of the `(` matching the `)` at `close`, scanning backwards. */
-function matchingOpen(source: string, close: number): number {
-  let depth = 0;
-  for (let i = close; i >= 0; i--) {
-    const c = source[i];
-    if (c === ")") depth++;
-    else if (c === "(") {
-      depth--;
-      if (depth === 0) return i;
-    }
-  }
-  return -1;
-}
-
-/** True when the call whose argument list opens at `open` is `x.each(...)(` or `x.each\`...\`(`. */
-function followsEach(source: string, open: number): boolean {
-  let i = open - 1;
-  while (i >= 0 && /\s/.test(source[i])) i--;
-  if (i < 0) return false;
-  if (source[i] === "`") return true;
-  if (source[i] !== ")") return false;
-  const calleeOpen = matchingOpen(source, i);
-  if (calleeOpen < 0) return false;
-  const before = source.slice(0, calleeOpen).trimEnd();
-  const name = /([A-Za-z_$][\w$]*)$/.exec(before)?.[1];
-  return name === "each" || name === "for";
 }
 
 /** Read the string literal that starts at `start`; return its value and end index. */
@@ -65,8 +27,7 @@ function readLiteral(source: string, start: number): [string, number] {
       );
     }
     if (c === "\\") {
-      const next = source[++i];
-      value += ESCAPES[next] ?? next;
+      value += c + source[++i];
     } else if (c === "\n" && quote !== "`") {
       break;
     } else {
@@ -77,19 +38,23 @@ function readLiteral(source: string, start: number): [string, number] {
 }
 
 /**
- * Recover the literal template title of an `it.each`/`test.each` registration
- * from source text at the registration's location. Returns `undefined` when the
- * registration is not an `each` form (the registered title is then the symbol).
- * Throws `TemplateNotRecovered` for an `each` whose title is not a plain literal.
+ * Recover the template title of an `it.each`/`test.each` registration as it is
+ * written in source (raw text between the quotes, escapes not decoded), which is
+ * what `quire coverage --json` reports. `line` and `column` are the
+ * registration's location, which vitest places at the call that takes the title.
+ * Throws `TemplateNotRecovered` when the title is not a plain literal.
  */
 export function recoverEachTemplate(
   source: string,
   line: number,
   column: number,
-): string | undefined {
+): string {
   const open = source.indexOf("(", offsetOf(source, line, column));
-  if (open === -1) return undefined;
-  if (!followsEach(source, open)) return undefined;
+  if (open === -1) {
+    throw new TemplateNotRecovered(
+      "no call found at the registration location",
+    );
+  }
   let i = open + 1;
   while (i < source.length && /\s/.test(source[i])) i++;
   const [value, end] = readLiteral(source, i);
