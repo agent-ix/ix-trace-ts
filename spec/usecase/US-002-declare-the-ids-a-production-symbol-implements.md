@@ -31,7 +31,9 @@ import { implementing } from "@agent-ix/ix-trace-ts";
 @implementing("FR-007-AC-1")
 export class HeadingLookup {
   @implementing("FR-007-AC-2")
-  first(document: string): string { return document; }
+  first(document: string): string {
+    return document;
+  }
 }
 
 export const parse = implementing("FR-007-AC-3")((text: string) => text.trim());

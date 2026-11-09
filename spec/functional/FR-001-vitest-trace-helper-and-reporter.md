@@ -143,7 +143,7 @@ renames every case.
 | FR-001-AC-11 | A real vitest suite run with emission enabled produces a result file that `quoin evidence record` accepts and whose obligation is bound; the same suite with its tagged test made to fail yields a failing entry and binds nothing.                                                                                                             | Test         |
 | FR-001-AC-12 | While enabled, an `it.each` whose template cannot be recovered from the source at the registration's location (held in a variable or built from an expression) fails the run with an error naming the test, and the reporter writes no interpolated title as the symbol.                                                                        | Test         |
 | FR-001-AC-13 | While `QUIRE_TRACE_EMIT` is unset or not `1`, a project configured with the reporter still gets a JUnit result file equal to the plain JUnit result without the reporter, with no `trace` property; the reporter never writes nothing.                                                                                                          | Test         |
-| FR-001-AC-14 | `@agent-ix/ix-trace-ts/vitest` exports `trace` and `TraceReporter`, the README and the documented imports use that path, and the package root does not export them. | Test |
+| FR-001-AC-14 | `@agent-ix/ix-trace-ts/vitest` exports `trace` and `TraceReporter`, the README and the documented imports use that path, and the package root does not export them.                                                                                                                                                                             | Test         |
 
 ## Constraints
 

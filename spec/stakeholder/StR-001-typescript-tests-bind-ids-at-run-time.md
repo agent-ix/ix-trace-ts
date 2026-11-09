@@ -26,11 +26,11 @@ the static and execution views never join.
 
 ## Validation Criteria
 
-| ID | Criteria | Validation |
-|----|----------|------------|
+| ID           | Criteria                                                                                                                                   | Validation    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
 | StR-001-VC-1 | A real vitest suite run with emission enabled produces a result file `quoin evidence record` accepts, and the obligation it names is bound | Demonstration |
-| StR-001-VC-2 | The same suite with its tagged test made to fail records a failing entry and binds nothing | Demonstration |
-| StR-001-VC-3 | A `trace()` call in a concurrent test fails loudly rather than attributing ids to the wrong test | Demonstration |
+| StR-001-VC-2 | The same suite with its tagged test made to fail records a failing entry and binds nothing                                                 | Demonstration |
+| StR-001-VC-3 | A `trace()` call in a concurrent test fails loudly rather than attributing ids to the wrong test                                           | Demonstration |
 
 ## Stakeholders
 

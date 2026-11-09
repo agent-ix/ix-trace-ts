@@ -34,9 +34,9 @@ Examined: FR-002-AC-1 through FR-002-AC-16, FR-002-CON-1 through FR-002-CON-5, F
 
 ## Findings
 
-| ID      | Severity | Summary | Refs |
-| ------- | -------- | ------- | ---- |
-| FND-001 | low | spec/tests.md "Verification Status" still says "Every test case is implemented in `tests/reporter.test.ts` and passes". After this PR, TC-014 through TC-029 live in tests/implementing.test.ts and tests/entries.test.ts, and TC-023 is not implemented. The FR-002-CON-1, CON-2, CON-3 and CON-5 rows also still say "not performed", although each inspection can now be done against shipped code; the reviewer did them and all four hold. Fix: rewrite the paragraph to name the three test files and the TC-023 exception, and update the four constraint rows to the inspection result. | spec/tests.md:71-75,89 |
+| ID      | Severity | Summary                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Refs                   |
+| ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| FND-001 | low      | spec/tests.md "Verification Status" still says "Every test case is implemented in `tests/reporter.test.ts` and passes". After this PR, TC-014 through TC-029 live in tests/implementing.test.ts and tests/entries.test.ts, and TC-023 is not implemented. The FR-002-CON-1, CON-2, CON-3 and CON-5 rows also still say "not performed", although each inspection can now be done against shipped code; the reviewer did them and all four hold. Fix: rewrite the paragraph to name the three test files and the TC-023 exception, and update the four constraint rows to the inspection result. | spec/tests.md:71-75,89 |
 
 ## Verdict
 
@@ -46,6 +46,6 @@ spec/tests.md also fails `prettier --check`. main's copy fails the same check, s
 
 ## Dispositions
 
-| FND     | Outcome | Reason |
-| ------- | ------- | ------ |
-| FND-001 | fixed | Disposition round 1, fix commit 6657b77. The Verification Status paragraph now names tests/reporter.test.ts (and tests/cost.test.ts for TC-010) for TC-001..013, tests/implementing.test.ts and tests/entries.test.ts for the FR-002 cases, and says TC-023 is not implemented. The FR-002-CON-1, CON-2, CON-3 and CON-5 rows now read "inspected, holds" (spec/tests.md:71-75,89-93). |
+| FND     | Outcome | Reason                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FND-001 | fixed   | Disposition round 1, fix commit 6657b77. The Verification Status paragraph now names tests/reporter.test.ts (and tests/cost.test.ts for TC-010) for TC-001..013, tests/implementing.test.ts and tests/entries.test.ts for the FR-002 cases, and says TC-023 is not implemented. The FR-002-CON-1, CON-2, CON-3 and CON-5 rows now read "inspected, holds" (spec/tests.md:71-75,89-93). |
