@@ -25,3 +25,10 @@ No assurance profile exists in this repository; this is a direct review, not an 
 ## Verdict
 
 The ids are consistent, the matrix is complete and the layout matches ix-trace-rs. Two low findings. FND-001 is a merge-ordering condition: land this PR together with quire-rs PR 622.
+
+## Dispositions
+
+| FND | outcome | reason |
+| --- | --- | --- |
+| FND-001 | fixed | Fix commit 8ca5fbc: the Dependencies section now states that FR-051-AC-47 and AC-48 are added by quire-rs#622, which lands together with this spec. Merge-batch condition: land with quire-rs PR 622. |
+| FND-002 | fixed | Fix commit 8ca5fbc: FR-001 now `implements` US-001, and Dependencies reads `US-001, which traces to StR-001`. |

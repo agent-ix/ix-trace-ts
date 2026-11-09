@@ -25,3 +25,10 @@ No assurance profile exists in this repository; this is a direct review, not an 
 ## Verdict
 
 One medium ambiguity (FND-001) and one low wording conflict (FND-002). Fix both in this PR.
+
+## Dispositions
+
+| FND | outcome | reason |
+| --- | --- | --- |
+| FND-001 | fixed | Fix commit 8ca5fbc: The reporter section now says the reporter is additive over vitest's standard JUnit output and writes the plain JUnit result while emission is off, never nothing. The new AC-13 and TC-013 assert this. |
+| FND-002 | fixed | Fix commit 8ca5fbc: AC-6 and TC-006 now read `a test skipped by its modifier carries no ids`. |

@@ -36,7 +36,7 @@ helper wherever it can.
 | TC-002 | Emission off: helper is a no-op, no `trace` property, results equal a no-package run, no extra runtime dependency | Integration | P1 | FR-001-AC-2 | 🚧 Planned — not run |
 | TC-003 | Emission on: several ids or repeated calls give each distinct id once; an uncalled test carries none | Integration | P1 | FR-001-AC-3 | 🚧 Planned — not run |
 | TC-004 | Emission on: ids are only `trace` call arguments, none inferred from titles | Integration | P1 | FR-001-AC-4 | 🚧 Planned — not run |
-| TC-005 | Symbols: nested `describe` gives bare title, `it.each` yields two cases named by the template title; `name`==`classname`, `file` set, equal to `quire coverage --json` | Integration | P1 | FR-001-AC-5, FR-001-AC-12 | 🚧 Planned — not run |
+| TC-005 | Symbols: nested `describe` gives bare title, `it.each` yields two cases named by the template title; `name`==`classname`, `file` set, equal to `quire coverage --json` | Integration | P1 | FR-001-AC-5 | 🚧 Planned — not run |
 | TC-006 | Modifier registrations (`skipIf`, `only`, `skip`) report the registered title once with the runner's outcome; a test skipped by its modifier carries no ids | Integration | P1 | FR-001-AC-6 | 🚧 Planned — not run |
 | TC-007 | A test that calls `trace` then throws is `fail` with its ids | Integration | P1 | FR-001-AC-7 | 🚧 Planned — not run |
 | TC-008 | Default parallel execution across files: each tagged test once with its own ids; `trace()` in an `it.concurrent` test, and in a test inheriting concurrency from `describe.concurrent`, throws an error stating the call was made in a concurrent test | Integration | P1 | FR-001-AC-8 | 🚧 Planned — not run |

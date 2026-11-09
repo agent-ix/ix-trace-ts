@@ -25,3 +25,16 @@ No assurance profile exists in this repository; this is a direct review, not an 
 ## Verdict
 
 Every AC can fail as written. FND-001 (medium) and FND-002 (low) are coverage gaps; fix both in this PR.
+
+## New findings (disposition pass 1)
+
+| ID | Severity | Summary | Refs |
+| --- | --- | --- | --- |
+| FND-003 | medium | The fix round added FR-001-AC-12 to the Traces To column of TC-005 (`FR-001-AC-5, FR-001-AC-12`) and also made it the only trace of the new TC-012. The Test Matrix's rule 2 says `no trace id appears on two different tests`. A collision is invisible to `quire coverage`: deleting either test leaves the row green on the strength of the other. TC-005's title does not exercise the unrecoverable-template case at all. Fix: remove FR-001-AC-12 from TC-005's Traces To, leaving `FR-001-AC-5`. | spec/tests.md:39, spec/tests.md:46 |
+
+## Dispositions
+
+| FND | outcome | reason |
+| --- | --- | --- |
+| FND-001 | fixed | Fix commit 8ca5fbc: the new FR-001-AC-12 and TC-012 test that an unrecoverable `it.each` template fails the run naming the test, with no fallback to the interpolated title. The FR prose now states there is no fallback. See FND-003 for the duplicate trace this fix added to TC-005. |
+| FND-002 | fixed | Fix commit 8ca5fbc: AC-8 and TC-008 now cover a test that inherits concurrency from `describe.concurrent`. |
