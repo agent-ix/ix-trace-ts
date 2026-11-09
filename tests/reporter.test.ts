@@ -179,6 +179,7 @@ it.each([1])('quote\\'s %s', () => { trace("E-4"); });
   ];
 
   it("TC-005 symbols: bare titles, each template, name == classname, file", async () => {
+    trace("FR-001-AC-5", "TC-005");
     const run = await runSuite(symbolFixture, { emit: "1" });
     expect(run.code).toBe(0);
     expect(run.cases.map((c) => c.name)).toEqual(symbols);
@@ -389,6 +390,19 @@ describe.concurrent("inherits", () => {
       expect(run.output).toMatch(/cannot name test "(held 1|built x 1|z a\))"/);
       expect(run.xml ?? "").not.toMatch(/held 1|built x 1|z a\)/);
     }
+  });
+
+  it("TC-012 two multi-line tagged tables whose titles both fit are not guessed", async () => {
+    const table = "test.each`\n  a | b\n  ${1} | ${2}\n`";
+    const run = await runSuite(
+      {
+        "a.test.ts": `${header}\n${table}("sum $a $b", () => {});\n${table}("sum $a", () => {});\n`,
+      },
+      { emit: "1" },
+    );
+    expect(run.code).not.toBe(0);
+    expect(run.output).toMatch(/cannot name test "sum 1/);
+    expect(run.xml).toBeUndefined();
   });
 
   it("TC-013 emission off: configured reporter still writes the plain JUnit result", async () => {

@@ -40,6 +40,8 @@ export interface Run {
   code: number;
   output: string;
   xml: string | undefined;
+  /** User plus system CPU seconds of the vitest process tree. */
+  cpuSeconds: number;
   cases: Case[];
 }
 
@@ -119,9 +121,19 @@ export default { test: { reporters: [${reporter}], ${options.testConfig ?? ""} }
   env.VITE_CONFIG_NATIVE_IGNORE_WARNING = "true";
   if (options.emit !== undefined) env.QUIRE_TRACE_EMIT = options.emit;
   return new Promise((done) => {
+    // bash's `time` reports user and system CPU of the command and its children.
     execFile(
-      process.execPath,
-      [VITEST, "run", "--root", dir, "--allowOnly"],
+      "bash",
+      [
+        "-c",
+        'TIMEFORMAT="%3U %3S"; time "$0" "$@"',
+        process.execPath,
+        VITEST,
+        "run",
+        "--root",
+        dir,
+        "--allowOnly",
+      ],
       { env, cwd: dir, maxBuffer: 64 * 1024 * 1024 },
       (error, stdout, stderr) => {
         let xml: string | undefined;
@@ -130,11 +142,14 @@ export default { test: { reporters: [${reporter}], ${options.testConfig ?? ""} }
         } catch {
           xml = undefined;
         }
+        const times = /(\d+\.\d+) (\d+\.\d+)\s*$/.exec(stderr);
+        const cpuSeconds = times ? Number(times[1]) + Number(times[2]) : NaN;
         const code = error ? ((error as { code?: number }).code ?? 1) : 0;
         done({
           dir,
           code,
           output: stdout + stderr,
+          cpuSeconds,
           xml,
           cases: xml ? parseCases(xml) : [],
         });

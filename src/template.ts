@@ -60,19 +60,17 @@ function consistent(raw: string, name: string): boolean {
   return new RegExp(`^${escaped.join(".*")}$`, "s").test(name);
 }
 
-/** Every title literal passed to a curried call (`x.each(...)(title` or a tagged template), nearest to `offset` first. */
-function curriedTitles(source: string, offset: number): string[] {
-  const found: { raw: string; at: number }[] = [];
+/** Every title literal passed to a curried call (`x.each(...)(title` or a tagged template). */
+function curriedTitles(source: string): string[] {
+  const found: string[] = [];
   for (const m of source.matchAll(/[)`]\s*\(/g)) {
-    const open = m.index + m[0].length - 1;
     try {
-      found.push({ raw: titleAfterParen(source, open), at: open });
+      found.push(titleAfterParen(source, m.index + m[0].length - 1));
     } catch (error) {
       if (!(error instanceof TemplateNotRecovered)) throw error;
     }
   }
-  found.sort((x, y) => Math.abs(x.at - offset) - Math.abs(y.at - offset));
-  return found.map((f) => f.raw);
+  return found;
 }
 
 /**
@@ -80,9 +78,10 @@ function curriedTitles(source: string, offset: number): string[] {
  * escapes not decoded, which is what `quire coverage --json` reports. `line` and
  * `column` are the registration's location, which names the call that takes the
  * title. For a multi-line tagged template vitest's location can be wrong, so for
- * `each` registrations the other curried-call titles in the file are tried,
- * nearest first. A candidate is accepted only if it could have produced the run
- * title `name`. Throws `TemplateNotRecovered` when none is.
+ * `each` registrations the curried-call titles in the file are the fallback. A
+ * candidate is accepted only if it could have produced the run title `name`, and
+ * a fallback only if exactly one distinct title could have. Throws
+ * `TemplateNotRecovered` when there is none, or more than one.
  */
 export function recoverTitle(
   source: string,
@@ -95,6 +94,10 @@ export function recoverTitle(
   const direct = (): string => {
     const open = source.indexOf("(", offset);
     if (open === -1) throw new TemplateNotRecovered("no call found");
+    if (each && open !== offset) {
+      // Vitest places an accurate `each` location exactly on the title's call.
+      throw new TemplateNotRecovered("the location is not at the title call");
+    }
     return titleAfterParen(source, open);
   };
   let failure: TemplateNotRecovered | undefined;
@@ -109,8 +112,15 @@ export function recoverTitle(
     failure = error;
   }
   if (each) {
-    const raw = curriedTitles(source, offset).find((r) => consistent(r, name));
-    if (raw !== undefined) return raw;
+    const fits = [
+      ...new Set(curriedTitles(source).filter((r) => consistent(r, name))),
+    ];
+    if (fits.length === 1) return fits[0];
+    if (fits.length > 1) {
+      throw new TemplateNotRecovered(
+        `the registration location is unreliable and ${fits.length} titles could be it (${fits.map((f) => `"${f}"`).join(", ")})`,
+      );
+    }
   }
   throw failure;
 }
