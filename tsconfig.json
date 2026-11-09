@@ -14,12 +14,6 @@
     "types": ["vitest/globals"],
     "rootDir": "src"
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "tests",
-    "dist",
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["tests", "dist", "node_modules"]
 }
