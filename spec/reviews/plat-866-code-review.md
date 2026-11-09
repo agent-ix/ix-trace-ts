@@ -43,3 +43,12 @@ On the brief's questions:
 5. TC-020 is a real check. Its third clause is vacuous (FND-001).
 7. Keeping `export default TraceReporter` in the vitest entry is spec-compatible. FR-002 restricts only the root ("SHALL export `implementing` and nothing else"). The subpath "SHALL export `trace` and `TraceReporter`", which is not an exclusive list. The default export was already on main, and it lets a vitest config name the reporter by module path.
 8. No pin, digest, tracking record, vendored file or compatibility layer was added. The lockfile is untouched. scripts/, the Makefile and the Dockerfile are untouched. The vite.config.ts change is limited to the entry map and file name, and it drops the UMD-only `name`, which has no effect on an `es`-only build.
+
+## Dispositions
+
+| FND     | Outcome | Reason |
+| ------- | ------- | ------ |
+| FND-001 | fixed | Disposition round 1, fix commit 6657b77. The `moduleLoadList` clause and the `loaded` key were removed from TC-020 (tests/entries.test.ts:57-67). The check that remains is that vitest is unresolvable, the root import succeeds and the wrapper returns the same function, and every part of it can fail. |
+| FND-002 | fixed | Disposition round 1, fix commit 6657b77. `"FR2-X"` was added to TC-024's rejected list (tests/implementing.test.ts:248). The reviewer applied the whole-id `/\d/.test(id)` mutant to src/implementing.ts:18, and TC-024 now fails under it. The mutant was then reverted. |
+| FND-003 | fixed | Disposition round 1, fix commit 6657b77. TC-026 adds `exp-static.ts` (a legacy static property) and `exp-ctor-parameter.ts` (a legacy constructor parameter). Every negative fixture now asserts the TS1240 (property/field) or TS1239 (parameter) diagnostic instead of any non-zero exit (tests/implementing.test.ts:304-339). |
+| FND-004 | fixed | Disposition round 1, fix commit 6657b77. The doc comment now says the caller writes the source as `implementing.ts` and no longer names a nonexistent option (tests/support/run.ts:211-213). |

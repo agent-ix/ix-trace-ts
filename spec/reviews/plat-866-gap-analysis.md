@@ -43,3 +43,9 @@ Examined: FR-002-AC-1 through FR-002-AC-16, FR-002-CON-1 through FR-002-CON-5, F
 Mergeable. Every FR-002 acceptance criterion except AC-10 is bound to a test that asserts it. AC-10 is deferred for a reason that holds: the upstream module form and binder do not exist yet. The status columns in spec/tests.md match what runs. The one finding is stale prose next to those columns.
 
 spec/tests.md also fails `prettier --check`. main's copy fails the same check, so this is not a regression from this PR.
+
+## Dispositions
+
+| FND     | Outcome | Reason |
+| ------- | ------- | ------ |
+| FND-001 | fixed | Disposition round 1, fix commit 6657b77. The Verification Status paragraph now names tests/reporter.test.ts (and tests/cost.test.ts for TC-010) for TC-001..013, tests/implementing.test.ts and tests/entries.test.ts for the FR-002 cases, and says TC-023 is not implemented. The FR-002-CON-1, CON-2, CON-3 and CON-5 rows now read "inspected, holds" (spec/tests.md:71-75,89-93). |
