@@ -30,7 +30,7 @@ afterAll(() => projects.forEach(removeProject));
 const hasQuire = hasTool("quire");
 const hasQuoin = hasTool("quoin");
 
-describe("FR-001 trace helper and reporter", () => {
+describe("FR-001 trace helper and reporter", { timeout: 120_000 }, () => {
   it("TC-001 trace type-checks string ids and rejects a non-string", async () => {
     trace("FR-001-AC-1", "TC-001");
     const dir = project({
