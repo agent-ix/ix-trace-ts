@@ -12,8 +12,9 @@ relationships:
 ## Stakeholder Need
 
 Authors of traced TypeScript repositories shall state, on a production class,
-method or function, the specification ids it implements, in a construct the
-compiler checks and the extractor reads from the syntax tree, so that the link
+method or function, the specification ids it implements, in a construct
+the compiler type-checks, the package checks for shape when it runs, and the
+extractor reads from the syntax tree, so that the link
 from a requirement to its production code does not depend on how a comment
 happens to be worded or wrapped.
 

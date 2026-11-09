@@ -64,7 +64,9 @@ one. The contract a writer must meet is the Emitter contract (E-1..E-10) of
   enabled; no call in one is attributed.
 - **Declaring ids at registration.** Only a call inside the test body is
   supported.
-- **Which ids exist.** The kind vocabulary is declared by the module.
+- **Which ids exist.** The kind vocabulary is declared by the module. `trace`
+  checks type only; `implementing` also checks that an id is id-shaped and never
+  checks membership.
 - **Static binding.** Reading `trace(...)` from the syntax tree is `quire-rs`
   FR-051, and reading `implementing(...)` is `quire-rs` FR-062, whose declared
   forms are `spec-artifacts-process` FR-004.
@@ -85,7 +87,10 @@ writes the ids to that test's `meta`, which vitest carries to the reporter. The
 reporter, while enabled, enables vitest's task location, writes the JUnit file
 itself with the runner's own outcome per test, and renames each case to the
 extractor's `qualified_name`. While not enabled both are inert and the package
-has no runtime dependency beyond the runner.
+has no runtime dependency beyond the runner. Separately, `implementing(...ids)`
+returns a function that serves as a decorator or a wrapper, checks each id's shape,
+and returns or leaves unchanged what it marks; it imports nothing beyond the
+language runtime, so production code uses it where no test runner is installed.
 
 ### Interfaces
 

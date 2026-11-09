@@ -27,7 +27,7 @@ helper wherever it can.
 | Functional Req | Acceptance Criteria | Test Cases | Status |
 |----|----|----|--------|
 | FR-001 vitest trace helper and reporter | AC-1..13; CON-1 | TC-001..TC-013 | 🚧 Planned — not run |
-| FR-002 implementing decorator and wrapper | AC-1..10; CON-1..3 | TC-014..TC-023 | 🚧 Planned — not run |
+| FR-002 implementing decorator and wrapper | AC-1..12; CON-1..4 | TC-014..TC-025 | 🚧 Planned — not run |
 
 ## Test Case Summary
 
@@ -50,12 +50,14 @@ helper wherever it can.
 | TC-015 | Standard decorators: class is the identical constructor; method behaviour and descriptor unchanged | Unit | P1 | FR-002-AC-2 | 🚧 Planned — not run |
 | TC-016 | `experimentalDecorators`: class and method unchanged, method descriptor not replaced | Unit | P1 | FR-002-AC-3 | 🚧 Planned — not run |
 | TC-017 | Wrapper returns the identical arrow function and function expression and keeps their types | Unit | P1 | FR-002-AC-4 | 🚧 Planned — not run |
-| TC-018 | No own key added to a marked class, method or function and no registry entry; exports unchanged | Unit | P1 | FR-002-AC-5 | 🚧 Planned — not run |
-| TC-019 | Run-time `TypeError` for an empty call and a non-string argument naming it; several and repeated ids accepted | Unit | P1 | FR-002-AC-6 | 🚧 Planned — not run |
+| TC-018 | No retained reference: marked function, class and method are collected under `--expose-gc` after release (`WeakRef` dereferences to `undefined`) and own keys and exports are unchanged; a fixture registry in a module, a closure and an in-place array each fail it | Unit | P1 | FR-002-AC-5 | 🚧 Planned — not run |
+| TC-019 | Run-time `TypeError`: empty call shows a well-formed call, non-string names its type and position; several and repeated ids accepted | Unit | P1 | FR-002-AC-6 | 🚧 Planned — not run |
 | TC-020 | Module using `implementing` loads with `vitest` unresolvable and loads no `vitest` module | Integration | P1 | FR-002-AC-7 | 🚧 Planned — not run |
 | TC-021 | On a test registration or `describe` callback it changes neither registration nor recorded `trace` ids under emission | Integration | P1 | FR-002-AC-8 | 🚧 Planned — not run |
-| TC-022 | Marked and unmarked function are the same object; median call time within 5% over five runs | Integration | P1 | FR-002-AC-9 | 🚧 Planned — not run |
-| TC-023 | A fixture module with a marked class, method and wrapped arrow const yields one `implements` per id and no `verifies` through `quire coverage --json` | E2E | P1 | FR-002-AC-10 | 🚧 Planned — not run |
+| TC-022 | Wrapped function `===` unwrapped function for an arrow function and a function expression | Unit | P1 | FR-002-AC-9 | 🚧 Planned — not run |
+| TC-023 | A fixture module with a marked class, method and wrapped arrow const yields one `implements` per id and no `verifies` through `quire coverage --json`, for both spellings; a renamed import and single-quoted, template-literal and concatenated ids run and bind nothing | E2E | P1 | FR-002-AC-10 | 🚧 Planned — not run |
+| TC-024 | Shape rule: `""`, `"FR 2"`, `"A-1, A-2"`, `"FR-XXX"` and `"1-A"` throw `TypeError` naming the argument; `ZZ-001`, `MADEUP-042-AC-9` and `interface_004-AC-1` are accepted; no kind list exists in the package | Unit | P1 | FR-002-AC-11 | 🚧 Planned — not run |
+| TC-025 | A nested marked declaration checks its ids on each call of the enclosing function, a module-level one once at load, and both stay unchanged | Unit | P1 | FR-002-AC-12 | 🚧 Planned — not run |
 
 ## Constraint Coverage
 
@@ -65,6 +67,7 @@ helper wherever it can.
 | FR-002-CON-1 | Inspection — no flag on `trace`; not performed |
 | FR-002-CON-2 | Inspection — no production `trace` export; not performed |
 | FR-002-CON-3 | Inspection — the package parses no source; not performed |
+| FR-002-CON-4 | TC-024 — no kind list in the package, `ZZ-001` accepted |
 
 ## Stakeholder Validation
 
@@ -74,7 +77,7 @@ helper wherever it can.
 | StR-001-VC-2 | FR-001 | Demonstration — covered by TC-011 failing variant | 🚧 |
 | StR-001-VC-3 | FR-001 | Demonstration — covered by TC-008 | 🚧 |
 | StR-002-VC-1 | US-002; FR-002 | Demonstration — covered by TC-023 | 🚧 |
-| StR-002-VC-2 | FR-002 | Demonstration — covered by TC-020 | 🚧 |
+| StR-002-VC-2 | FR-002 | Demonstration — covered by TC-015 and TC-020 | 🚧 |
 
 ## Verification Status
 
