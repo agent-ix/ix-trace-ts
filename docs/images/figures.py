@@ -89,8 +89,8 @@ def entries():
         "entries",
         980,
         176,
-        f"The package has two entries. The root exports {', '.join(ROOT_NAMES)} and imports no "
-        f"other package, so production code can use it where no test runner is installed. "
+        f"The package has two entries. The root exports {', '.join(ROOT_NAMES)} and {root_load}"
+        f"{', so production code can use it where no test runner is installed' if not EXTERNAL else ''}. "
         f"The ./vitest subpath exports {', '.join(VITEST_NAMES)} and loads vitest {PEER}.",
     )
     f.box(0, 0, 300, 78, "code", "production code", "class, method or function", "declares what it implements")
