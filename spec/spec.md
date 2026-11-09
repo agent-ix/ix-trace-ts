@@ -18,6 +18,9 @@ relationships:
   - target: "ix://agent-ix/quire-rs/FR-051"
     type: "depends_on"
     cardinality: "1:1"
+  - target: "ix://agent-ix/quire-rs/FR-062"
+    type: "depends_on"
+    cardinality: "1:1"
 security_critical: false
 ---
 
@@ -46,6 +49,10 @@ one. The contract a writer must meet is the Emitter contract (E-1..E-10) of
   a `trace` property on each test that declared ids.
 - The symbol the reporter writes for each case (`name`, `classname`, `file`), so
   the execution view joins the static view.
+- `implementing(...ids)`, the decorator and wrapper a production class, method or
+  function carries to declare the ids it implements, returning every declaration
+  unchanged and importing no test runner, from a package root that exports it alone,
+  with `trace` and the reporter on the `/vitest` subpath.
 - The package's stated limits: jest unsupported, concurrent tests unsupported,
   and the amended E-4 exception.
 
@@ -58,9 +65,16 @@ one. The contract a writer must meet is the Emitter contract (E-1..E-10) of
   enabled; no call in one is attributed.
 - **Declaring ids at registration.** Only a call inside the test body is
   supported.
-- **Which ids exist.** The kind vocabulary is declared by the module.
+- **Which ids exist.** The kind vocabulary is declared by the module. `trace`
+  checks type only; `implementing` also checks that an id is id-shaped and never
+  checks membership.
 - **Static binding.** Reading `trace(...)` from the syntax tree is `quire-rs`
-  FR-051.
+  FR-051, and reading `implementing(...)` is `quire-rs` FR-062, whose declared
+  forms are `spec-artifacts-process` FR-004.
+- **A production `trace` construct.** Evidence is declared by `trace(...)` only;
+  scope and evidence stay separate constructs.
+- **Structural scope on a `function` declaration.** The language admits no
+  decorator there; the wrapper form on an arrow-valued binding is the construct.
 - **Other languages.** The Rust and Python emitters are `ix-trace-rs` and
   `ix-trace-py`. `QUIRE_TRACE_EMIT` is the enable name for the pytest and
   TypeScript emitters only; the Rust emitter is enabled by a cargo feature.
@@ -74,12 +88,16 @@ writes the ids to that test's `meta`, which vitest carries to the reporter. The
 reporter, while enabled, enables vitest's task location, writes the JUnit file
 itself with the runner's own outcome per test, and renames each case to the
 extractor's `qualified_name`. While not enabled both are inert and the package
-has no runtime dependency beyond the runner.
+has no runtime dependency beyond the runner. Separately, `implementing(...ids)`
+returns a function that serves as a decorator or a wrapper, checks each id's shape,
+and returns or leaves unchanged what it marks; it imports nothing beyond the
+language runtime, so production code uses it where no test runner is installed.
 
 ### Interfaces
 
-The public surface is the `trace` helper, the reporter, and the environment
-variable `QUIRE_TRACE_EMIT`.
+The package root exports `implementing` only. The subpath
+`@agent-ix/ix-trace-ts/vitest` exports the `trace` helper and the reporter. The
+environment variable `QUIRE_TRACE_EMIT` enables emission.
 
 ## Requirements Architecture
 
@@ -87,10 +105,15 @@ variable `QUIRE_TRACE_EMIT`.
 
 - **Functional** — the helper and reporter
   ([FR-001](./functional/FR-001-vitest-trace-helper-and-reporter.md)).
+- **Functional (scope)** — the production `implementing` construct
+  ([FR-002](./functional/FR-002-implementing-construct.md)).
 - **Stakeholder** — the need the package answers
   ([StR-001](./stakeholder/StR-001-typescript-tests-bind-ids-at-run-time.md)),
   reached through
-  [US-001](./usecase/US-001-run-a-tagged-suite-and-record-its-evidence.md).
+  [US-001](./usecase/US-001-run-a-tagged-suite-and-record-its-evidence.md); and
+  [StR-002](./stakeholder/StR-002-typescript-production-code-declares-the-ids-it-implements.md),
+  reached through
+  [US-002](./usecase/US-002-declare-the-ids-a-production-symbol-implements.md).
 
 ### Traceability Approach
 
@@ -105,5 +128,8 @@ test carrying the id. The package marks its own tests with its own helper.
 - [quire-rs FR-051](ix://agent-ix/quire-rs/FR-051) — the marker form and the
   `qualified_name` the reporter must equal (FR-051-AC-47), and the end-to-end
   demonstration of the emitter chain (FR-051-AC-48).
+- [quire-rs FR-062](ix://agent-ix/quire-rs/FR-062) — the `implements` relation and
+  the `typescript_decorator` and `typescript_wrapper` syntax positions that bind
+  the construct.
 - ISO/IEC/IEEE 29148:2018 — requirements engineering, the shape these artifacts
   follow.

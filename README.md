@@ -10,16 +10,20 @@ Status: private, pre-release. The package is not published anywhere.
 
 ## Usage
 
+Planned: the `@agent-ix/ix-trace-ts/vitest` import path below takes effect with the
+implementation of the package-entry layout (spec FR-002-AC-16); the `exports` map
+does not declare it yet.
+
 ```ts
 // vitest.config.ts
-import { TraceReporter } from "@agent-ix/ix-trace-ts";
+import { TraceReporter } from "@agent-ix/ix-trace-ts/vitest";
 export default {
   test: { reporters: [new TraceReporter({ outputFile: "junit.xml" })] },
 };
 ```
 
 ```ts
-import { trace } from "@agent-ix/ix-trace-ts";
+import { trace } from "@agent-ix/ix-trace-ts/vitest";
 it("verifies the thing", () => {
   trace("FR-001-AC-1");
 });
