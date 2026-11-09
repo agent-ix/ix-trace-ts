@@ -53,4 +53,4 @@ takes no decorator; write it as an arrow-valued constant to wrap it.
 ## Notes (Informative)
 
 An id held in a variable is accepted at run time, but the static side binds only
-quoted string literals.
+double-quoted string literals.

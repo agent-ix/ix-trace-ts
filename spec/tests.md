@@ -26,8 +26,8 @@ helper wherever it can.
 
 | Functional Req                          | Acceptance Criteria | Test Cases     | Status     |
 | --------------------------------------- | ------------------- | -------------- | ---------- |
-| FR-001 vitest trace helper and reporter | AC-1..13; CON-1     | TC-001..TC-013 | ✅ Passing |
-| FR-002 implementing decorator and wrapper | AC-1..12; CON-1..4 | TC-014..TC-025 | 🚧 Planned — not run |
+| FR-001 vitest trace helper and reporter | AC-1..14; CON-1     | TC-001..TC-013, TC-029 | ✅ Passing for AC-1..13; AC-14 🚧 Planned |
+| FR-002 implementing decorator and wrapper | AC-1..16; CON-1..5 | TC-014..TC-029 | 🚧 Planned — not run |
 
 ## Test Case Summary
 
@@ -47,17 +47,21 @@ helper wherever it can.
 | TC-012  | An `it.each` whose template cannot be recovered (variable or expression) fails the enabled run naming the test, with no interpolated-title fallback                                                                                                    | Integration | P1       | FR-001-AC-12 | ✅ Passing |
 | TC-013  | Emission off: a project configured with the reporter still gets the plain JUnit result a project would get without it, no `trace` property, never no file                                                                                              | Integration | P1       | FR-001-AC-13 | ✅ Passing |
 | TC-014 | Type-check: string ids accepted; a non-string argument and an empty call are compile-time errors | Unit | P1 | FR-002-AC-1 | 🚧 Planned — not run |
-| TC-015 | Standard decorators: class is the identical constructor; method behaviour and descriptor unchanged | Unit | P1 | FR-002-AC-2 | 🚧 Planned — not run |
-| TC-016 | `experimentalDecorators`: class and method unchanged, method descriptor not replaced | Unit | P1 | FR-002-AC-3 | 🚧 Planned — not run |
+| TC-015 | Standard decorators: class is the identical constructor; class, method, getter and setter descriptors on the prototype equal the unmarked member's on every attribute | Unit | P1 | FR-002-AC-2 | 🚧 Planned — not run |
+| TC-016 | `experimentalDecorators`: class, method and accessor unchanged, prototype descriptors equal on every attribute | Unit | P1 | FR-002-AC-3 | 🚧 Planned — not run |
 | TC-017 | Wrapper returns the identical arrow function and function expression and keeps their types | Unit | P1 | FR-002-AC-4 | 🚧 Planned — not run |
-| TC-018 | No retained reference: marked function, class and method are collected under `--expose-gc` after release (`WeakRef` dereferences to `undefined`) and own keys and exports are unchanged; a fixture registry in a module, a closure and an in-place array each fail it | Unit | P1 | FR-002-AC-5 | 🚧 Planned — not run |
+| TC-018 | No retained reference, run under `--expose-gc` (dedicated subprocess or worker execArgv), failing when `gc` is not a function, yielding before `gc()` and before `deref()`: every `WeakRef` dereferences to `undefined`; own names and symbols unchanged; module-level array, closure array and `Map` fixtures fail it | Unit | P1 | FR-002-AC-5 | 🚧 Planned — not run |
 | TC-019 | Run-time `TypeError`: empty call shows a well-formed call, non-string names its type and position; several and repeated ids accepted | Unit | P1 | FR-002-AC-6 | 🚧 Planned — not run |
-| TC-020 | Module using `implementing` loads with `vitest` unresolvable and loads no `vitest` module | Integration | P1 | FR-002-AC-7 | 🚧 Planned — not run |
+| TC-020 | Package root loads with `vitest` unresolvable, `implementing` works, and no `vitest` module is loaded | Integration | P1 | FR-002-AC-7 | 🚧 Planned — not run |
 | TC-021 | On a test registration or `describe` callback it changes neither registration nor recorded `trace` ids under emission | Integration | P1 | FR-002-AC-8 | 🚧 Planned — not run |
-| TC-022 | Wrapped function `===` unwrapped function for an arrow function and a function expression | Unit | P1 | FR-002-AC-9 | 🚧 Planned — not run |
+| TC-022 | Zero-argument call of the returned function throws `TypeError` showing the call shapes; two arguments return `undefined`; one returns the argument | Unit | P1 | FR-002-AC-9 | 🚧 Planned — not run |
 | TC-023 | A fixture module with a marked class, method and wrapped arrow const yields one `implements` per id and no `verifies` through `quire coverage --json`, for both spellings; a renamed import and single-quoted, template-literal and concatenated ids run and bind nothing | E2E | P1 | FR-002-AC-10 | 🚧 Planned — not run |
 | TC-024 | Shape rule: `""`, `"FR 2"`, `"A-1, A-2"`, `"FR-XXX"` and `"1-A"` throw `TypeError` naming the argument; `ZZ-001`, `MADEUP-042-AC-9` and `interface_004-AC-1` are accepted; no kind list exists in the package | Unit | P1 | FR-002-AC-11 | 🚧 Planned — not run |
 | TC-025 | A nested marked declaration checks its ids on each call of the enclosing function, a module-level one once at load, and both stay unchanged | Unit | P1 | FR-002-AC-12 | 🚧 Planned — not run |
+| TC-026 | Positions: standard decorators accept class, method, getter and setter and reject a field; `experimentalDecorators` accepts class and member calls and rejects a property call and a parameter call; a class expression type-checks | Unit | P1 | FR-002-AC-13 | 🚧 Planned — not run |
+| TC-027 | Package root namespace keys equal `["implementing"]` | Unit | P1 | FR-002-AC-14 | 🚧 Planned — not run |
+| TC-028 | Module graph from the built root contains no `vitest` specifier and the package declares no runtime dependency | Integration | P1 | FR-002-AC-15 | 🚧 Planned — not run |
+| TC-029 | `exports` map declares `.` and `./vitest`; `@agent-ix/ix-trace-ts/vitest` exports `trace` and `TraceReporter` and the root does not | Integration | P1 | FR-002-AC-16, FR-001-AC-14 | 🚧 Planned — not run |
 
 ## Constraint Coverage
 
@@ -68,6 +72,7 @@ helper wherever it can.
 | FR-002-CON-2 | Inspection — no production `trace` export; not performed |
 | FR-002-CON-3 | Inspection — the package parses no source; not performed |
 | FR-002-CON-4 | TC-024 — no kind list in the package, `ZZ-001` accepted |
+| FR-002-CON-5 | Inspection — the root re-exports neither `trace` nor `TraceReporter`; not performed |
 
 ## Stakeholder Validation
 

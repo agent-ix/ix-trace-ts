@@ -52,15 +52,25 @@ nor import a binding named `implements`.
   `function` declaration admits no decorator, so a function is written as such a
   binding to carry the construct.
 
-The returned function changes nothing it is given. Called with one argument, as the
-wrapper form calls it and as a legacy class decorator is called, it returns that
-argument. Called with two or more, as a standard decorator `(value, context)` and a
-legacy member decorator `(target, key, descriptor)` are called, it returns
-`undefined`, which both conventions read as "leave the declaration as it is"; a
-legacy member decorator that returned its first argument would be read as a
-replacement descriptor. It does not wrap, replace or mutate the declaration, does
-not record it in a registry and does not read the environment, so a marked
-declaration is identical to the unmarked one.
+The returned function SHALL change nothing it is given.
+
+- When it is called with one argument, as the wrapper form calls it and as a legacy
+  class decorator is called, it SHALL return that argument.
+- When it is called with two or more arguments, as a standard decorator
+  `(value, context)` and a legacy member decorator `(target, key, descriptor)` are
+  called, it SHALL return `undefined`, which both conventions read as "leave the
+  declaration as it is". A legacy member decorator that returned its first argument
+  would be read as a replacement descriptor.
+- When it is called with no argument, it SHALL throw a `TypeError` showing the
+  accepted call shapes.
+- It SHALL NOT wrap, replace or mutate the declaration, record it in a registry, or
+  read the environment, so a marked declaration is identical to the unmarked one.
+
+**Stated limit.** The result is chosen by argument count alone, because the
+decorator calling conventions and the wrapper call cannot be told apart otherwise.
+Used as a callback (`ids.map(implementing("A-1"))`) or given a stray second
+argument, the returned function returns `undefined` or its first argument as the
+count dictates and raises no error. Such a use is outside the construct.
 
 `implementing` is a separate name from `trace` and not an option of it. `trace`
 declares evidence and may back an acceptance criterion; `implementing` declares
@@ -96,13 +106,24 @@ checks type only; the shape check belongs to this construct, whose only effect i
 the static relation, so an id that binds nothing is a defect worth failing on. All
 three errors are `TypeError`, the JavaScript convention for an invalid argument.
 
-### Import posture
+### Package entries
 
-Importing the package for `implementing` imports nothing beyond the language
-runtime, and in particular not `vitest`, so production code that uses it runs where
-no test runner is installed. The reporter of
-[FR-001](./FR-001-vitest-trace-helper-and-reporter.md) is a separate entry that only
-a vitest configuration loads.
+The package SHALL have two entries, declared in the `exports` map of its
+`package.json`.
+
+- The package root, `@agent-ix/ix-trace-ts`, SHALL export `implementing` and nothing
+  else, SHALL have no runtime dependency, and SHALL NOT import `vitest` anywhere in
+  its module graph, so production code that imports `implementing` runs where no test
+  runner is installed. The root is the namespace-import target that
+  [spec-artifacts-process FR-004](ix://agent-ix/spec-artifacts-process/FR-004) and
+  quire-rs FR-062 pin (`import * as ixTrace from "@agent-ix/ix-trace-ts"`).
+- The subpath `@agent-ix/ix-trace-ts/vitest` SHALL export `trace` and the reporter
+  `TraceReporter` of [FR-001](./FR-001-vitest-trace-helper-and-reporter.md), and
+  SHALL be the only entry that loads `vitest`.
+
+The package is pre-release, so moving `trace` and the reporter from the root to the
+subpath replaces the old import path and carries no compatibility export at the root.
+FR-001's documented imports, the README and spec.md name the subpath.
 
 ### Statically bound spellings
 
@@ -129,13 +150,25 @@ declaration nested in a function body it is each call of that function, so the i
 are checked on every such call; the marked declaration is still the unchanged
 declaration, and nothing is added per call of the marked function itself.
 
-### Typing across decorator conventions
+### Accepted positions and typing
 
-The returned function is typed to be accepted by a standard (TC39) decorator
-position on a class and on a method, by the legacy `experimentalDecorators` class
-and method positions, and as a one-argument wrapper that returns the type of its
-argument, so the same call compiles under either compiler setting and a wrapped
-arrow function keeps its own type.
+The accepted positions are a class declaration, a method and a `get` or `set`
+accessor, the same constructs quire-rs FR-062 binds (it parses an accessor as a
+method definition). The returned function SHALL be typed so that each accepted
+position compiles and so that a field or a parameter position is a compile-time
+error:
+
+- under standard (TC39) decorators it accepts a class, method, getter and setter
+  context and not a field context;
+- under `experimentalDecorators` it accepts a class constructor and a
+  `(target, key, descriptor)` member call whose descriptor is required, so a
+  property call (no descriptor) and a parameter call (a numeric index) do not
+  type-check;
+- as a one-argument wrapper it returns the type of its argument, so a wrapped arrow
+  function keeps its own type.
+
+A decorator on a class expression type-checks, because the compiler gives it the
+same context as a class declaration; it binds nothing statically (quire-rs FR-062).
 
 ## Rationale
 
@@ -152,17 +185,21 @@ module loads, where the Rust attribute is compile-time.
 | ID | Criteria | Verification |
 | --- | --- | --- |
 | FR-002-AC-1 | `implementing("FR-002-AC-1", "FR-002-AC-2")` type-checks as an exported function accepting string ids, and a call with a non-string argument or with no argument is a compile-time error. | Test |
-| FR-002-AC-2 | As a decorator under standard decorators, `@implementing(...)` on a class and on a method leaves each unchanged: the class is the identical constructor, and the method's behaviour and `prototype` property descriptor equal those of the unmarked method. | Test |
-| FR-002-AC-3 | As a decorator under `experimentalDecorators`, `@implementing(...)` on a class and on a method leaves each unchanged, and the method's property descriptor is not replaced. | Test |
+| FR-002-AC-2 | As a decorator under standard decorators, `@implementing(...)` on a class, a method and a getter or setter leaves each unchanged: the class is the identical constructor, and for each member `Object.getOwnPropertyDescriptor(Class.prototype, name)` has the same `value`, `get`, `set`, `writable`, `enumerable` and `configurable` as for the unmarked member. | Test |
+| FR-002-AC-3 | As a decorator under `experimentalDecorators`, `@implementing(...)` on a class, a method and an accessor leaves each unchanged, with `Object.getOwnPropertyDescriptor(Class.prototype, name)` equal to the unmarked member's on every attribute. | Test |
 | FR-002-AC-4 | As a wrapper, `implementing("FR-002-AC-3")(fn)` returns the identical function object for an arrow function and for a function expression, and the wrapped value keeps its parameter and return types at compile time. | Test |
-| FR-002-AC-5 | `implementing(...)` retains no reference to what it marks: a function, class and method marked inside a scope, then released, are collected under `--expose-gc` (a `WeakRef` to each dereferences to `undefined` after `gc()`), and the own keys of each and the package's exports are equal before and after marking, so a registry held in a module, a closure or an in-place container would fail it. | Test |
+| FR-002-AC-5 | `implementing(...)` retains no reference to what it marks. The test runs in a process started with `--expose-gc`, either a dedicated `node --expose-gc` subprocess or the runner's documented worker `execArgv` option, and FAILS, never skips, when `gc` is not a function. It marks a function, a class and a method inside a scope, releases them, yields to the event loop, calls `gc()`, yields again, and requires each `WeakRef` to dereference to `undefined`; the own property names and symbols of each marked object and of `implementing` itself are equal before and after marking. A fixture implementation that pushes to a module-level array, a closure array or a `Map` fails the same test. | Test |
 | FR-002-AC-6 | At run time a call with no argument throws a `TypeError` whose message shows a well-formed call; an argument that is not a `string` throws a `TypeError` naming its type and position; several ids and a repeated id are accepted. | Test |
-| FR-002-AC-7 | Loading a module that uses `implementing` in a process in which `vitest` cannot be resolved succeeds, and `vitest` is not among the modules loaded afterwards. | Test |
+| FR-002-AC-7 | Loading the package root in a process in which `vitest` cannot be resolved succeeds and `implementing` works, and `vitest` is not among the modules loaded afterwards. | Test |
 | FR-002-AC-8 | `implementing(...)` used on a test registration or on a `describe` callback changes neither the test's registration nor its recorded `trace` ids under `QUIRE_TRACE_EMIT=1`. | Test |
-| FR-002-AC-9 | The wrapped function is the unwrapped function: `wrapped === unwrapped` holds for an arrow function and for a function expression, so a call to it adds no work. | Test |
+| FR-002-AC-9 | The returned function called with no argument throws a `TypeError` that shows the accepted call shapes, and called with two arguments returns `undefined`, and with one argument returns that argument, as the Two written forms section states. | Test |
 | FR-002-AC-10 | A fixture module whose production class, method and wrapped arrow-valued const carry `implementing(...)` yields, through `quire coverage --json` under the module of `spec-artifacts-process`, one `implements` relation per declared id on each marked symbol and no `verifies` relation, for both `implementing(...)` and `ixTrace.implementing(...)`, while a renamed import, and a single-quoted, template-literal or concatenated id, runs and binds nothing. | Test |
 | FR-002-AC-11 | `implementing("")`, `implementing("FR 2")`, `implementing("A-1, A-2")`, `implementing("FR-XXX")` and `implementing("1-A")` each throw a `TypeError` naming the argument, while `implementing("ZZ-001")`, `implementing("MADEUP-042-AC-9")` and `implementing("interface_004-AC-1")` are accepted, since shape is checked and membership never is. | Test |
 | FR-002-AC-12 | A marked declaration nested in a function body is evaluated, and its ids checked, on each call of that function, and a module-level one once when the module loads; in both the marked declaration is unchanged. | Test |
+| FR-002-AC-13 | Under standard decorators a class, method, getter and setter position type-checks and a field position is a compile-time error; under `experimentalDecorators` a class and a `(target, key, descriptor)` member call type-check and a property call and a parameter call are compile-time errors; a class-expression position type-checks. | Test |
+| FR-002-AC-14 | The package root exports exactly `implementing`: the keys of the module namespace of `@agent-ix/ix-trace-ts` equal `["implementing"]`, and `trace` and `TraceReporter` are not among them. | Test |
+| FR-002-AC-15 | The module graph reachable from the package root contains no `vitest` specifier and the package declares no runtime dependency, checked over the built root entry and its imports. | Test |
+| FR-002-AC-16 | The `exports` map of `package.json` declares `.` and `./vitest`, and `@agent-ix/ix-trace-ts/vitest` exports `trace` and `TraceReporter` (FR-001-AC-14). | Test |
 
 ## Constraints
 
@@ -172,6 +209,7 @@ module loads, where the Rust attribute is compile-time.
 | FR-002-CON-2 | The package SHALL NOT export a production `trace` construct. | Design | Inspection |
 | FR-002-CON-3 | The package SHALL NOT parse source or import the extractor to bind a marker; static binding is quire-rs. | Design | Inspection |
 | FR-002-CON-4 | The package SHALL NOT encode which kinds exist; shape is checked and membership never is. | Design | Test (TC-024) |
+| FR-002-CON-5 | The package root SHALL NOT re-export `trace` or `TraceReporter` for compatibility. | Design | Inspection |
 
 ## Dependencies
 

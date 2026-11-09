@@ -12,14 +12,14 @@ Status: private, pre-release. The package is not published anywhere.
 
 ```ts
 // vitest.config.ts
-import { TraceReporter } from "@agent-ix/ix-trace-ts";
+import { TraceReporter } from "@agent-ix/ix-trace-ts/vitest";
 export default {
   test: { reporters: [new TraceReporter({ outputFile: "junit.xml" })] },
 };
 ```
 
 ```ts
-import { trace } from "@agent-ix/ix-trace-ts";
+import { trace } from "@agent-ix/ix-trace-ts/vitest";
 it("verifies the thing", () => {
   trace("FR-001-AC-1");
 });

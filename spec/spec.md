@@ -51,7 +51,8 @@ one. The contract a writer must meet is the Emitter contract (E-1..E-10) of
   the execution view joins the static view.
 - `implementing(...ids)`, the decorator and wrapper a production class, method or
   function carries to declare the ids it implements, returning every declaration
-  unchanged and importing no test runner.
+  unchanged and importing no test runner, from a package root that exports it alone,
+  with `trace` and the reporter on the `/vitest` subpath.
 - The package's stated limits: jest unsupported, concurrent tests unsupported,
   and the amended E-4 exception.
 
@@ -94,8 +95,9 @@ language runtime, so production code uses it where no test runner is installed.
 
 ### Interfaces
 
-The public surface is the `trace` helper, the `implementing` function, the
-reporter, and the environment variable `QUIRE_TRACE_EMIT`.
+The package root exports `implementing` only. The subpath
+`@agent-ix/ix-trace-ts/vitest` exports the `trace` helper and the reporter. The
+environment variable `QUIRE_TRACE_EMIT` enables emission.
 
 ## Requirements Architecture
 
