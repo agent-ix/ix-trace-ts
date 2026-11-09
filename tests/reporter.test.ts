@@ -1,4 +1,4 @@
-import { execFile, execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -9,6 +9,7 @@ import { trace } from "../src/vitest";
 import {
   REPO,
   SRC,
+  hasTool,
   header,
   makeProject,
   parseCases,
@@ -26,14 +27,6 @@ const project = (files: Record<string, string>) => {
 };
 afterAll(() => projects.forEach(removeProject));
 
-const hasTool = (cmd: string) => {
-  try {
-    execFileSync(cmd, ["--version"], { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-};
 const hasQuire = hasTool("quire");
 const hasQuoin = hasTool("quoin");
 
