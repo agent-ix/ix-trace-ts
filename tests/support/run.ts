@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import {
   mkdirSync,
   mkdtempSync,
@@ -255,4 +255,14 @@ export function compileAndRun(
       },
     );
   });
+}
+
+/** True when `cmd --version` runs, so a test can skip when a tool is absent. */
+export function hasTool(cmd: string): boolean {
+  try {
+    execFileSync(cmd, ["--version"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
 }

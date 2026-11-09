@@ -1,4 +1,4 @@
-import { execFile, execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { delimiter, join } from "node:path";
 import { promisify } from "node:util";
@@ -6,7 +6,12 @@ import { promisify } from "node:util";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { trace } from "../src/vitest";
-import { compileAndRun, makeProject, removeProject } from "./support/run";
+import {
+  compileAndRun,
+  hasTool,
+  makeProject,
+  removeProject,
+} from "./support/run";
 
 const exec = promisify(execFile);
 const projects: string[] = [];
@@ -17,14 +22,7 @@ const project = (files: Record<string, string>) => {
 };
 afterAll(() => projects.forEach(removeProject));
 
-const hasQuire = (() => {
-  try {
-    execFileSync("quire", ["--version"], { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-})();
+const hasQuire = hasTool("quire");
 
 /**
  * Module directories, found the way quire finds them: every entry of
@@ -53,11 +51,7 @@ const declaresForms = modules.some((dir) => {
     text.includes("syntax: typescript_wrapper")
   );
 });
-const skipReason = !hasQuire
-  ? "quire is not on PATH"
-  : !declaresForms
-    ? "IX_FILAMENT_MODULES_PATH names no spec-artifacts-process module that declares typescript_decorator and typescript_wrapper"
-    : undefined;
+const runnable = hasQuire && declaresForms;
 
 const production = (importLine: string) => `${importLine}
 import * as ixTrace from "./implementing";
@@ -85,12 +79,18 @@ export const concat = implementing("FR-0" + "10")(() => 10);
 const IMPORT = `import { implementing } from "./implementing";`;
 
 describe("FR-002 static binding through quire", { timeout: 120_000 }, () => {
-  it.skipIf(skipReason !== undefined)(
+  it.skipIf(!runnable)(
     "TC-023 marked class, method, accessor and wrapped const bind implements through quire coverage",
     async () => {
       trace("FR-002-AC-10", "TC-023");
       const dir = project({
         "src/prod.ts": production(IMPORT),
+        "src/prod.test.ts": `import { it } from "vitest";
+import { trace } from "@agent-ix/ix-trace-ts/vitest";
+it("widget works", () => {
+  trace("FR-001");
+});
+`,
         "spec/.keep": "",
       });
       const { stdout } = await exec(
@@ -123,7 +123,15 @@ describe("FR-002 static binding through quire", { timeout: 120_000 }, () => {
           .sort(),
       );
       // Static binding is `implements`, never `verifies`.
-      expect(JSON.stringify(report)).not.toContain("verifies");
+      const channels = JSON.stringify([
+        report.untracked_symbols,
+        report.groups,
+        report.binding_census,
+      ]);
+      // The test file's own binding shows the channels are live; the
+      // production file appears in none of them.
+      expect(channels).toContain("src/prod.test.ts");
+      expect(channels).not.toContain("src/prod.ts");
 
       // The same file, with the same marked declarations, runs unchanged:
       // renamed import, single-quoted, template-literal and concatenated ids
