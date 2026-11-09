@@ -54,8 +54,7 @@ try { await import("vitest"); } catch { resolved = false; }
 const mod = await import(${JSON.stringify(join(outside, "index.mjs"))});
 const marker = mod.implementing("FR-002-AC-7");
 const fn = () => 1;
-const loaded = process.moduleLoadList.filter((m) => m.includes("vitest"));
-console.log(JSON.stringify({ resolved, same: marker(fn) === fn, loaded }));
+console.log(JSON.stringify({ resolved, same: marker(fn) === fn }));
 `;
     const { stdout } = await exec(
       process.execPath,
@@ -65,7 +64,6 @@ console.log(JSON.stringify({ resolved, same: marker(fn) === fn, loaded }));
     expect(JSON.parse(stdout)).toEqual({
       resolved: false,
       same: true,
-      loaded: [],
     });
   });
 

@@ -1,0 +1,45 @@
+---
+id: SR-014
+title: "Code review of agent-ix/ix-trace-ts PR 9 (PLAT-866): implementing decorator and wrapper, root and /vitest entries"
+type: SpecReview
+analysis: code-review
+scope: "agent-ix/ix-trace-ts; src/implementing.ts, src/index.ts, src/vitest.ts, vite.config.ts, package.json, README.md, tests/implementing.test.ts, tests/entries.test.ts, tests/support/run.ts, tests/cost.test.ts, tests/reporter.test.ts, spec/tests.md (PR 9 diff only, head 7ee355f)"
+review_set: subset
+---
+
+## Summary
+
+Ticket: PLAT-866. PR 9, head `7ee355f`, scoped to `git diff origin/main...HEAD`. This covers the code-review method with its TypeScript and test-quality lane. There are no `.tsx` files and no React, so review-react does not apply.
+
+Evidence gathered:
+
+- The tests for the touched code (`tests/implementing.test.ts`, `tests/entries.test.ts`) pass 15 of 15 under a scratch `pnpm install --frozen-lockfile`. The lockfile is unchanged and the frozen install succeeds with the new `peerDependenciesMeta`. eslint is clean on every touched `.ts` file.
+- `vite build` emits `dist/index.js`, `dist/vitest.js`, `dist/index.d.ts` and `dist/vitest.d.ts`. `dist/index.js` has no import statement at all. `dist/vitest.js` holds the only `vitest` import. vitest stays external through the existing `/^vitest(\/|$)/` entry.
+- The decorator positions were probed with tsc 5.9.3 under both `--strict` and non-strict, in both decorator modes. The following are all compile-time errors (TS1240 or TS1239): a legacy static property, a legacy constructor parameter, a legacy static-method parameter, a legacy instance property and parameter, a standard static field and a standard `accessor` field. A legacy and a standard static method type-check. A non-callable wrapper argument (`42`, `{}`) is TS2345. The author's report that the legacy overload accepts a static property or a constructor-parameter decorator did not reproduce. The `<T extends Callable>(declaration: T, ...rest: never[]): T` overload rejects both, because the key (`"x"`) and the index (`0`) are not assignable to `never`. The `(target, key, descriptor)` overload rejects `undefined` as a key, and rejects `0` as a `PropertyDescriptor` (TS weak-type check).
+- `process.moduleLoadList` lists only Node built-ins. Even after `import()` of vitest's own `dist/index.js` it contains no entry with `vitest` (FND-001).
+- Id-shape rule: `ix-trace-rs` FR-003 defines id-shaped as a KIND followed by hyphen segments "at least one of which contains an ASCII digit". `ix-trace-rs` src/lib.rs:194 states that "a digit somewhere after the kind is the whole discriminator". The FR-002 sentence has the same grammar, where "of which" refers to the segments. So the author's reading is the right one: the digit must be in the hyphen tail, and `FR2-X` is rejected. `src/implementing.ts:18` implements that reading. TC-024 does not pin it (FND-002).
+
+Examined: src/implementing.ts, src/index.ts, src/vitest.ts, vite.config.ts, package.json, README.md, tests/implementing.test.ts, tests/entries.test.ts, tests/support/run.ts, dist/ build output. They were checked against FR-002-AC-1 through FR-002-AC-16, FR-002-CON-1 through FR-002-CON-5, FR-001-AC-14 and the FR-002 "Package entries" section. Context only: ix-trace-rs FR-003 and src/lib.rs, quire-rs FR-062, spec-artifacts-process FR-004.
+
+## Findings
+
+| ID      | Severity | Summary | Refs |
+| ------- | -------- | ------- | ---- |
+| FND-001 | low | TC-020's `loaded: []` clause can never fail. `process.moduleLoadList` records only Node built-in modules and never user-land ESM, and stays free of `vitest` even after vitest itself is imported. AC-7 still holds as tested: the test first proves `vitest` is unresolvable from the scratch directory, so a root that imported vitest would throw on `import()`. The third clause adds nothing, though. Fix: delete the `moduleLoadList` clause, or replace it with a check that can fail, such as a `--import` loader hook that records resolved specifiers. | tests/entries.test.ts:57,68 |
+| FND-002 | low | TC-024 does not pin where the required digit sits. Replacing `!/\d/.test(match[1])` with a whole-id `/\d/.test(id)` passes every TC-024 case, because each rejected string either fails the regex or has no digit anywhere. Under the spec's rule (and ix-trace-rs FR-003), a digit in the KIND does not count. Fix: add a rejected case whose only digit is in the KIND, for example `implementing("FR2-X")` or `implementing("interface_004-AC")`. | tests/implementing.test.ts:248; src/implementing.ts:18 |
+| FND-003 | low | TC-026's negative fixtures cover only an instance property and an instance-method parameter, and assert only a non-zero tsc exit. The overload most likely to admit a bad position is the one-argument wrapper overload. It accepts a constructor, which is what a legacy static property or constructor-parameter decorator receives first, and no test covers those positions. Reviewer probes show they are rejected today. Fix: add `static x = 1` and `constructor(@implementing("A-1") p)` fixtures under `--experimentalDecorators`, and assert the TS1240 or TS1239 diagnostic code rather than any non-zero exit. | tests/implementing.test.ts:304-320 |
+| FND-004 | low | The doc comment of `compileAndRun` says "`implementingSource` overrides the copy", but no such option exists. Callers pass the source as an `implementing.ts` fixture file. Fix: drop the sentence or describe the fixture-file convention. | tests/support/run.ts:212 |
+
+## Verdict
+
+Mergeable. All four findings are low and none is wrong behaviour.
+
+On the brief's questions:
+
+1. The package root exports exactly `implementing`. It has no runtime dependency (`dependencies` is absent and vitest is an optional peer). The root bundle imports nothing. The `exports` map declares `.` and `./vitest`, and the root carries no compatibility export (CON-5 holds). The build emits both entries and both type files.
+2. The accepted positions match the spec in both decorator modes. Fields and parameters are compile-time errors, including the static and constructor-parameter cases. Descriptor equality and identity are tested through capture decorators that record the original. A zero-argument call throws `TypeError`, one argument returns it, and two or more return `undefined`. The wrapper overload does not violate the spec: it narrows the wrapper to callables, keeps the argument's type, and also serves the legacy class decorator, which the spec requires to return its argument.
+3. The author's id-shape reading is right (see Summary).
+4. TC-018 runs in a `node --expose-gc` subprocess. It fails rather than skips when `gc` is missing, which is asserted. It yields before `gc()` and before `deref()`. Each of the three leak fixtures is asserted to fail with "retained", and the source substitution is guarded by `toContain` so a fixture cannot silently equal the real code.
+5. TC-020 is a real check. Its third clause is vacuous (FND-001).
+7. Keeping `export default TraceReporter` in the vitest entry is spec-compatible. FR-002 restricts only the root ("SHALL export `implementing` and nothing else"). The subpath "SHALL export `trace` and `TraceReporter`", which is not an exclusive list. The default export was already on main, and it lets a vitest config name the reporter by module path.
+8. No pin, digest, tracking record, vendored file or compatibility layer was added. The lockfile is untouched. scripts/, the Makefile and the Dockerfile are untouched. The vite.config.ts change is limited to the entry map and file name, and it drops the UMD-only `name`, which has no effect on an `es`-only build.

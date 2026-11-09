@@ -68,11 +68,11 @@ helper wherever it can.
 | Constraint   | Covering evidence                                                                                                |
 | ------------ | ---------------------------------------------------------------------------------------------------------------- |
 | FR-001-CON-1 | Inspection — the reporter writes the file once during the run and no step rewrites it (also exercised by TC-009) |
-| FR-002-CON-1 | Inspection — no flag on `trace`; not performed |
-| FR-002-CON-2 | Inspection — no production `trace` export; not performed |
-| FR-002-CON-3 | Inspection — the package parses no source; not performed |
+| FR-002-CON-1 | Inspection — no flag on `trace`; inspected, holds (PLAT-866 review SR-014) |
+| FR-002-CON-2 | Inspection — no production `trace` export; inspected, holds (PLAT-866 review SR-014) |
+| FR-002-CON-3 | Inspection — the package parses no source; inspected, holds (PLAT-866 review SR-014) |
 | FR-002-CON-4 | TC-024 — no kind list in the package, `ZZ-001` accepted |
-| FR-002-CON-5 | Inspection — the root re-exports neither `trace` nor `TraceReporter`; not performed |
+| FR-002-CON-5 | Inspection — the root re-exports neither `trace` nor `TraceReporter`; inspected, holds (PLAT-866 review SR-014) |
 
 ## Stakeholder Validation
 
@@ -86,9 +86,11 @@ helper wherever it can.
 
 ## Verification Status
 
-Every test case is implemented in `tests/reporter.test.ts` and passes. Each runs
-vitest in a subprocess over a fixture suite and reads the JUnit file the reporter
-wrote. TC-005 compares the reporter's symbols with `quire coverage --json`, and
+TC-001..TC-013 are implemented in `tests/reporter.test.ts` (and `tests/cost.test.ts`
+for TC-010) and pass. Each runs vitest in a subprocess over a fixture suite and
+reads the JUnit file the reporter wrote. TC-014..TC-019, TC-021, TC-022 and TC-024..TC-027 are in
+`tests/implementing.test.ts`, TC-020, TC-028 and TC-029 in `tests/entries.test.ts`,
+and all pass; TC-023 is not implemented. TC-005 compares the reporter's symbols with `quire coverage --json`, and
 TC-011 runs `quoin evidence record`; each is reported as skipped when its tool is not on `PATH`. jest is
 unsupported and is not counted as a gap here.
 

@@ -209,7 +209,8 @@ export interface Compiled {
 
 /**
  * Compile fixture files with tsc to CommonJS next to a copy of the construct's
- * source, then run `main.js` under node. `implementingSource` overrides the copy.
+ * source (written by the caller as `implementing.ts`), then run `main.js` under
+ * node.
  */
 export function compileAndRun(
   dir: string,

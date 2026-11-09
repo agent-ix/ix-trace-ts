@@ -245,7 +245,7 @@ const mark = (() => {
 
   it("TC-024 checks id shape and never membership", () => {
     trace("FR-002-AC-11", "TC-024", "FR-002-CON-4");
-    for (const bad of ["", "FR 2", "A-1, A-2", "FR-XXX", "1-A"]) {
+    for (const bad of ["", "FR 2", "A-1, A-2", "FR-XXX", "1-A", "FR2-X"]) {
       expect(() => implementing(bad), bad).toThrow(TypeError);
       expect(() => implementing(bad), bad).toThrow(JSON.stringify(bad));
     }
@@ -305,6 +305,14 @@ void C;
 class C { @implementing("A-1") x = 1; }
 void C;
 `,
+      "exp-static.ts": `import { implementing } from ${impl};
+class C { @implementing("A-1") static x = 1; }
+void C;
+`,
+      "exp-ctor-parameter.ts": `import { implementing } from ${impl};
+class C { constructor(@implementing("A-1") p: number) { void p; } }
+void C;
+`,
       "exp-parameter.ts": `import { implementing } from ${impl};
 class C { m(@implementing("A-1") p: number) { void p; } }
 void C;
@@ -313,11 +321,21 @@ void C;
     const exp = ["--experimentalDecorators"];
     const ok = await typeCheck(dir, "std-ok.ts");
     expect(ok.out).toBe("");
-    expect((await typeCheck(dir, "std-field.ts")).code).not.toBe(0);
+    expect((await typeCheck(dir, "std-field.ts")).out).toContain("TS1240");
     const expOk = await typeCheck(dir, "exp-ok.ts", exp);
     expect(expOk.out).toBe("");
-    expect((await typeCheck(dir, "exp-property.ts", exp)).code).not.toBe(0);
-    expect((await typeCheck(dir, "exp-parameter.ts", exp)).code).not.toBe(0);
+    expect((await typeCheck(dir, "exp-property.ts", exp)).out).toContain(
+      "TS1240",
+    );
+    expect((await typeCheck(dir, "exp-static.ts", exp)).out).toContain(
+      "TS1240",
+    );
+    expect((await typeCheck(dir, "exp-parameter.ts", exp)).out).toContain(
+      "TS1239",
+    );
+    expect((await typeCheck(dir, "exp-ctor-parameter.ts", exp)).out).toContain(
+      "TS1239",
+    );
   });
 
   it("TC-027 the package root exports exactly implementing", async () => {
