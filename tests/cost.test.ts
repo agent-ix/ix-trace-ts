@@ -10,7 +10,7 @@ it("TC-010 cost: 500 tagged tests add under 5% median wall-clock", async () => {
   trace("FR-001-AC-10", "TC-010");
   let body = header;
   for (let i = 0; i < 500; i++) {
-    body += `it("t${i}", () => { trace("P-${i}"); let x = 0; for (let k = 0; k < 1e5; k++) x += k; expect(x).toBeGreaterThan(0); });\n`;
+    body += `it("t${i}", () => { trace("P-${i}"); let x = 0; for (let k = 0; k < 2e5; k++) x += k; expect(x).toBeGreaterThan(0); });\n`;
   }
   const dir = makeProject({ "a.test.ts": body });
   try {

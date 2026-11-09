@@ -37,24 +37,8 @@ function readLiteral(source: string, start: number): [string, number] {
   throw new TemplateNotRecovered("the title literal is not terminated");
 }
 
-/**
- * Recover the template title of an `it.each`/`test.each` registration as it is
- * written in source (raw text between the quotes, escapes not decoded), which is
- * what `quire coverage --json` reports. `line` and `column` are the
- * registration's location, which vitest places at the call that takes the title.
- * Throws `TemplateNotRecovered` when the title is not a plain literal.
- */
-export function recoverEachTemplate(
-  source: string,
-  line: number,
-  column: number,
-): string {
-  const open = source.indexOf("(", offsetOf(source, line, column));
-  if (open === -1) {
-    throw new TemplateNotRecovered(
-      "no call found at the registration location",
-    );
-  }
+/** The title literal of the call whose `(` is at `open`, if it is a plain literal. */
+function titleAfterParen(source: string, open: number): string {
   let i = open + 1;
   while (i < source.length && /\s/.test(source[i])) i++;
   const [value, end] = readLiteral(source, i);
@@ -64,4 +48,69 @@ export function recoverEachTemplate(
     throw new TemplateNotRecovered("the title is built from an expression");
   }
   return value;
+}
+
+const DECODED: Record<string, string> = { n: "\n", t: "\t", r: "\r" };
+
+/** Could `raw` (a title as written in source) have produced the run title `name`? */
+function consistent(raw: string, name: string): boolean {
+  const decoded = raw.replace(/\\(.)/gs, (_, c: string) => DECODED[c] ?? c);
+  const parts = decoded.split(/%[sdifjoOpc#]|%%|\$\{[^}]*\}|\$[\w.]+/);
+  const escaped = parts.map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  return new RegExp(`^${escaped.join(".*")}$`, "s").test(name);
+}
+
+/** Every title literal passed to a curried call (`x.each(...)(title` or a tagged template), nearest to `offset` first. */
+function curriedTitles(source: string, offset: number): string[] {
+  const found: { raw: string; at: number }[] = [];
+  for (const m of source.matchAll(/[)`]\s*\(/g)) {
+    const open = m.index + m[0].length - 1;
+    try {
+      found.push({ raw: titleAfterParen(source, open), at: open });
+    } catch (error) {
+      if (!(error instanceof TemplateNotRecovered)) throw error;
+    }
+  }
+  found.sort((x, y) => Math.abs(x.at - offset) - Math.abs(y.at - offset));
+  return found.map((f) => f.raw);
+}
+
+/**
+ * Recover a test's title as written in source: the raw text between the quotes,
+ * escapes not decoded, which is what `quire coverage --json` reports. `line` and
+ * `column` are the registration's location, which names the call that takes the
+ * title. For a multi-line tagged template vitest's location can be wrong, so for
+ * `each` registrations the other curried-call titles in the file are tried,
+ * nearest first. A candidate is accepted only if it could have produced the run
+ * title `name`. Throws `TemplateNotRecovered` when none is.
+ */
+export function recoverTitle(
+  source: string,
+  line: number,
+  column: number,
+  name: string,
+  each: boolean,
+): string {
+  const offset = offsetOf(source, line, column);
+  const direct = (): string => {
+    const open = source.indexOf("(", offset);
+    if (open === -1) throw new TemplateNotRecovered("no call found");
+    return titleAfterParen(source, open);
+  };
+  let failure: TemplateNotRecovered | undefined;
+  try {
+    const raw = direct();
+    if (consistent(raw, name)) return raw;
+    failure = new TemplateNotRecovered(
+      "the title read at the location does not match the run title",
+    );
+  } catch (error) {
+    if (!(error instanceof TemplateNotRecovered)) throw error;
+    failure = error;
+  }
+  if (each) {
+    const raw = curriedTitles(source, offset).find((r) => consistent(r, name));
+    if (raw !== undefined) return raw;
+  }
+  throw failure;
 }

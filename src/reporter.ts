@@ -10,7 +10,7 @@ import type {
   Vitest,
 } from "vitest/node";
 
-import { recoverEachTemplate, TemplateNotRecovered } from "./template";
+import { recoverTitle, TemplateNotRecovered } from "./template";
 import { emissionEnabled, TRACE_META_KEY } from "./trace";
 
 export interface TraceReporterOptions {
@@ -196,13 +196,27 @@ function row(test: TestCase, file: string, source: string | undefined): Row {
 }
 
 function symbolOf(test: TestCase, source: string | undefined): string {
-  if (!(test as unknown as { task: { each?: boolean } }).task.each)
-    return test.name;
+  const each = (test as unknown as { task: { each?: boolean } }).task.each;
   const location = test.location;
   if (!location || source === undefined) {
-    throw new TemplateNotRecovered(
-      "the registration location or source is unavailable",
-    );
+    if (each) {
+      throw new TemplateNotRecovered(
+        "the registration location or source is unavailable",
+      );
+    }
+    return test.name;
   }
-  return recoverEachTemplate(source, location.line, location.column);
+  try {
+    return recoverTitle(
+      source,
+      location.line,
+      location.column,
+      test.name,
+      !!each,
+    );
+  } catch (error) {
+    // A plain title held in a variable is the registered title itself.
+    if (each || !(error instanceof TemplateNotRecovered)) throw error;
+    return test.name;
+  }
 }

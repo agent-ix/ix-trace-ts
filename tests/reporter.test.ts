@@ -146,6 +146,20 @@ describe("outer", () => {
 it.each([1, 2])("adds %s", () => { trace("E-1"); });
 test.each([[1], [2]])(\`tpl %s\`, () => { trace("E-2"); });
 it.each(["a)"])("paren %s", () => { trace("E-3"); });
+it.for([1, 2])("for %s", () => { trace("E-5"); });
+it("plain \\"q\\" title", () => { trace("E-6"); });
+test.each\`
+  a | b
+  \${1} | \${2}
+
+\`("multi $a $b", () => { trace("E-7"); });
+test.each\`
+  a | b
+  \${1} | \${2}
+\`(
+  "multi2 $a $b",
+  () => { trace("E-8"); },
+);
 it.each([1])('quote\\'s %s', () => { trace("E-4"); });
 `,
   };
@@ -156,11 +170,15 @@ it.each([1])('quote\\'s %s', () => { trace("E-4"); });
     "tpl %s",
     "tpl %s",
     "paren %s",
+    "for %s",
+    "for %s",
+    'plain \\"q\\" title',
+    "multi $a $b",
+    "multi2 $a $b",
     "quote\\'s %s",
   ];
 
   it("TC-005 symbols: bare titles, each template, name == classname, file", async () => {
-    trace("FR-001-AC-5");
     const run = await runSuite(symbolFixture, { emit: "1" });
     expect(run.code).toBe(0);
     expect(run.cases.map((c) => c.name)).toEqual(symbols);
@@ -174,7 +192,7 @@ it.each([1])('quote\\'s %s', () => { trace("E-4"); });
   it.skipIf(!hasQuire)(
     "TC-005 symbols equal what quire coverage --json reports",
     async () => {
-      trace("TC-005");
+      trace("FR-001-AC-5", "TC-005");
       const dir = project(symbolFixture);
       const run = await runVitest(dir, { emit: "1" });
       const { stdout } = await exec(
