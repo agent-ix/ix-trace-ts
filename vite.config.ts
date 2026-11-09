@@ -15,6 +15,7 @@ const external = [
   "react",
   "yaml",
   "zod",
+  /^vitest(\/|$)/,
 ];
 
 export default defineConfig({
