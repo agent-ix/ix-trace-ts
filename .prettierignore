@@ -34,4 +34,3 @@ tmp/
 __pycache__/
 *.pyc
 *.egg-info/
-CLA.md

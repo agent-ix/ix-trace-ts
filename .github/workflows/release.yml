@@ -14,8 +14,5 @@ jobs:
     uses: agent-ix/nodejs-actions/.github/workflows/release.yml@main
     with:
       npm_registry: https://registry.npmjs.org
-      # First publish uses a token; a follow-up flips this to true (OIDC only).
-      trusted_publish: false
+      trusted_publish: true
       node_version: "22" # OIDC Trusted Publishing requires Node >= 22.14
-    secrets:
-      NPM_REGISTRY_TOKEN: ${{ secrets.NPM_TOKEN }}
