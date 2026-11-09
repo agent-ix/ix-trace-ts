@@ -22,9 +22,8 @@ export default defineConfig({
   plugins: [dts({ rollupTypes: true, include: ["src"] })],
   build: {
     lib: {
-      entry: "src/index.ts",
-      name: "Ixtracets",
-      fileName: (format) => `index.js`,
+      entry: { index: "src/index.ts", vitest: "src/vitest.ts" },
+      fileName: (_format, name) => `${name}.js`,
       formats: ["es"],
     },
     target: "node18",
