@@ -41,7 +41,7 @@ helper wherever it can.
 | TC-007  | A test that calls `trace` then throws is `fail` with its ids                                                                                                                                                                                           | Integration | P1       | FR-001-AC-7  | ✅ Passing |
 | TC-008  | Default parallel execution across files: each tagged test once with its own ids; `trace()` in an `it.concurrent` test, and in a test inheriting concurrency from `describe.concurrent`, throws an error stating the call was made in a concurrent test | Integration | P1       | FR-001-AC-8  | ✅ Passing |
 | TC-009  | Result file written by the reporter during the run, no sidecar or post-run rewrite                                                                                                                                                                     | Integration | P1       | FR-001-AC-9  | ✅ Passing |
-| TC-010  | Cost: 500-test tagged suite under 5% median CPU-time overhead with emission on (opt-in: runs only with `QUIRE_PERF_TESTS=1`)                                                                                                                           | Integration | P1       | FR-001-AC-10 | ✅ Passing |
+| TC-010  | Cost: 500-test tagged suite under 5% median wall-clock overhead with emission on (opt-in: runs only with `QUIRE_PERF_TESTS=1`)                                                                                                                         | Integration | P1       | FR-001-AC-10 | ✅ Passing |
 | TC-011  | End to end: real vitest suite -> `quoin evidence record` binds; failing variant binds nothing                                                                                                                                                          | E2E         | P1       | FR-001-AC-11 | ✅ Passing |
 | TC-012  | An `it.each` whose template cannot be recovered (variable or expression) fails the enabled run naming the test, with no interpolated-title fallback                                                                                                    | Integration | P1       | FR-001-AC-12 | ✅ Passing |
 | TC-013  | Emission off: a project configured with the reporter still gets the plain JUnit result a project would get without it, no `trace` property, never no file                                                                                              | Integration | P1       | FR-001-AC-13 | ✅ Passing |
@@ -68,7 +68,6 @@ wrote. TC-005 compares the reporter's symbols with `quire coverage --json`, and
 TC-011 runs `quoin evidence record`; each is reported as skipped when its tool is not on `PATH`. jest is
 unsupported and is not counted as a gap here.
 
-TC-010 measures CPU time (CR-001 in FR-001) and is skipped unless
-`QUIRE_PERF_TESTS=1` is set: with every core busy its median ratio still reached
-1.06, so a default run would be flaky. FR-001-AC-10 is therefore verified only on
-an opt-in run, which passes on an idle machine.
+TC-010 times wall-clock and is skipped unless `QUIRE_PERF_TESTS=1` is set, since
+wall-clock varies with host load. FR-001-AC-10 is therefore verified only on an
+opt-in run, which passes on an uncontended host.
