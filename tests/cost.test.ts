@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { trace } from "../src";
+import { trace } from "../src/vitest";
 import { header, makeProject, removeProject, runVitest } from "./support/run";
 
 const median = (xs: number[]) =>

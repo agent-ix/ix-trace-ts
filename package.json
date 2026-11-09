@@ -10,6 +10,17 @@
     "README.md"
   ],
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.ts",
+      "default": "./dist/vitest.js"
+    }
+  },
   "packageManager": "pnpm@10.33.4",
   "scripts": {
     "help": "node scripts/help.js",
@@ -53,6 +64,11 @@
   },
   "peerDependencies": {
     "vitest": "^4.1.2"
+  },
+  "peerDependenciesMeta": {
+    "vitest": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "registry": "http://npm.ix/"

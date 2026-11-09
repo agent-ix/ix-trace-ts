@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 
 import { afterAll, describe, expect, it } from "vitest";
 
-import { trace } from "../src";
+import { trace } from "../src/vitest";
 import {
   REPO,
   SRC,

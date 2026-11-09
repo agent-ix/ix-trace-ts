@@ -12,7 +12,8 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const REPO = resolve(here, "../..");
-export const SRC = join(REPO, "src/index.ts");
+export const SRC = join(REPO, "src/vitest.ts");
+export const IMPL = join(REPO, "src/index.ts");
 const VITEST = join(REPO, "node_modules/vitest/vitest.mjs");
 
 export type Emit = "1" | "0" | "true" | undefined;
@@ -93,7 +94,10 @@ export function makeProject(files: Record<string, string>): string {
   for (const [path, text] of Object.entries(files)) {
     const target = join(dir, path);
     mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, text.replaceAll("__SRC__", SRC));
+    writeFileSync(
+      target,
+      text.replaceAll("__SRC__", SRC).replaceAll("__IMPL__", IMPL),
+    );
   }
   return dir;
 }
@@ -159,3 +163,96 @@ export async function runSuite(
 export const header = `import { TestRunner, describe, expect, it, test } from "vitest";
 import { trace } from "__SRC__";
 `;
+
+const TSC = join(REPO, "node_modules/typescript/bin/tsc");
+
+/** Type-check one fixture file; `code` is tsc's exit status, `out` its diagnostics. */
+export function typeCheck(
+  dir: string,
+  file: string,
+  flags: string[] = [],
+): Promise<{ code: number; out: string }> {
+  return new Promise((done) => {
+    execFile(
+      process.execPath,
+      [
+        TSC,
+        "--noEmit",
+        "--strict",
+        "--skipLibCheck",
+        "--module",
+        "esnext",
+        "--moduleResolution",
+        "bundler",
+        "--target",
+        "esnext",
+        "--types",
+        "node",
+        "--typeRoots",
+        join(REPO, "node_modules/@types"),
+        ...flags,
+        join(dir, file),
+      ],
+      (error, stdout, stderr) =>
+        done({
+          code: error ? ((error as { code?: number }).code ?? 1) : 0,
+          out: stdout + stderr,
+        }),
+    );
+  });
+}
+
+export interface Compiled {
+  code: number;
+  out: string;
+}
+
+/**
+ * Compile fixture files with tsc to CommonJS next to a copy of the construct's
+ * source (written by the caller as `implementing.ts`), then run `main.js` under
+ * node.
+ */
+export function compileAndRun(
+  dir: string,
+  options: { experimental?: boolean; nodeArgs?: string[] } = {},
+): Promise<Compiled> {
+  return new Promise((done) => {
+    const flags = options.experimental ? ["--experimentalDecorators"] : [];
+    execFile(
+      process.execPath,
+      [
+        TSC,
+        "--strict",
+        "--skipLibCheck",
+        "--target",
+        "es2022",
+        "--module",
+        "commonjs",
+        "--outDir",
+        join(dir, "out"),
+        "--types",
+        "node",
+        "--typeRoots",
+        join(REPO, "node_modules/@types"),
+        ...flags,
+        join(dir, "main.ts"),
+        join(dir, "implementing.ts"),
+      ],
+      (compileError, compileOut, compileErr) => {
+        if (compileError) {
+          done({ code: 1, out: `tsc: ${compileOut}${compileErr}` });
+          return;
+        }
+        execFile(
+          process.execPath,
+          [...(options.nodeArgs ?? []), join(dir, "out/main.js")],
+          (error, stdout, stderr) =>
+            done({
+              code: error ? ((error as { code?: number }).code ?? 1) : 0,
+              out: stdout + stderr,
+            }),
+        );
+      },
+    );
+  });
+}
