@@ -29,10 +29,10 @@ should be as hard to mistype as the test side.
 
 ## Validation Criteria
 
-| ID | Criteria | Validation |
-|----|----------|------------|
+| ID           | Criteria                                                                                                                                                                                | Validation    |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
 | StR-002-VC-1 | A production class, method and arrow-valued const marked with the construct are read by `quire coverage` as `implements` relations to their ids and contribute no verification evidence | Demonstration |
-| StR-002-VC-2 | A marked production module runs unchanged where no test runner is installed | Demonstration |
+| StR-002-VC-2 | A marked production module runs unchanged where no test runner is installed                                                                                                             | Demonstration |
 
 ## Stakeholders
 
