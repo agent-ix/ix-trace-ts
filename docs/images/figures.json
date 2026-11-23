@@ -1,7 +1,20 @@
 {
   "data": {
     "emit": {"from":"regex","path":"src/trace.ts","pattern":"EMIT_ENV = \"([A-Z_]+)\";"},
-    "meta": {"from":"regex","path":"src/trace.ts","pattern":"TRACE_META_KEY = \"(\\w+)\";"}
+    "meta": {"from":"regex","path":"src/trace.ts","pattern":"TRACE_META_KEY = \"(\\w+)\";"},
+    "root_entry": {"from":"json","path":"package.json","pointer":"/exports/./default"},
+    "vitest_entry": {"from":"json","path":"package.json","pointer":"/exports/.~1vitest/default"},
+    "peer": {"from":"json","path":"package.json","pointer":"/peerDependencies/vitest"},
+    "from_imports": {"from":"regex","path":"src/index.ts","all":true,"allow_empty":true,"pattern":"(?m)^\\s*(?:import|export)\\b[^;]*?\\bfrom\\s+\"([^\"]+)\""},
+    "plain_imports": {"from":"regex","path":"src/index.ts","all":true,"allow_empty":true,"pattern":"(?m)^\\s*import\\s+\"([^\"]+)\""},
+    "impl_from_imports": {"from":"regex","path":"src/implementing.ts","all":true,"allow_empty":true,"pattern":"(?m)^\\s*(?:import|export)\\b[^;]*?\\bfrom\\s+\"([^\"]+)\""},
+    "impl_plain_imports": {"from":"regex","path":"src/implementing.ts","all":true,"allow_empty":true,"pattern":"(?m)^\\s*import\\s+\"([^\"]+)\""},
+    "external": {"from":"expr","value":"drop(flatten([impl_from_imports, from_imports, impl_plain_imports, plain_imports]), '^[.]')"},
+    "root_exports_raw": {"from":"regex","path":"src/index.ts","all":true,"allow_empty":true,"pattern":"export \\{([^}]*)\\}"},
+    "vitest_exports_raw": {"from":"regex","path":"src/vitest.ts","all":true,"allow_empty":true,"pattern":"export \\{([^}]*)\\}"},
+    "root_names": {"from":"expr","value":"unique(drop(trim(rsub(trim(flatten(split(root_exports_raw, ','))), ' as .*$', '')), '^$'))"},
+    "vitest_names": {"from":"expr","value":"unique(drop(trim(rsub(trim(flatten(split(vitest_exports_raw, ','))), ' as .*$', '')), '^$'))"},
+    "root_load": {"from":"expr","value":"if(len(external) == 0, 'imports no other package', 'imports ' + join(external, ', '))"}
   },
   "figures": [
     {
@@ -21,7 +34,23 @@
         {"k":"note","at":[740,53],"text":"xml","role":"logic"},
         {"k":"legend","at":[0,138],"entries":[["code","test source","box"],["logic","processing step","box"],["model","JUnit result","box"]]}
       ]
+    },
+    {
+      "id": "entries",
+      "width": 980, "height": 176,
+      "label": "The package has two entries. The root exports {join(root_names, ', ')} and {root_load}{if(len(external) == 0, ', so production code can use it where no test runner is installed', '')}. The ./vitest subpath exports {join(vitest_names, ', ')} and loads vitest {peer}.",
+      "items": [
+        {"k":"box","at":[0,0,300,78],"role":"code","title":"production code","subs":["class, method or function","declares what it implements"]},
+        {"k":"box","at":[0,98,300,78],"role":"code","title":"test code and vitest config","subs":["it(...) bodies","reporter in vitest.config.ts"]},
+        {"k":"box","at":[400,0,300,78],"role":"logic","title":"@agent-ix/ix-trace-ts","subs":["=join(root_names, ', ')","=rsub(root_entry, '^[./]+', '')"]},
+        {"k":"box","at":[400,98,300,78],"role":"logic","title":"@agent-ix/ix-trace-ts/vitest","subs":["=join(vitest_names, ', ')","=rsub(vitest_entry, '^[./]+', '')"]},
+        {"k":"box","at":[780,0,200,78],"role":"evidence","title":"no test runner","subs":["=root_load","runs anywhere"]},
+        {"k":"box","at":[780,98,200,78],"role":"model","title":"vitest {peer}","subs":["peer dependency","optional"]},
+        {"k":"line","points":[[300,39],[397,39]],"role":"code"},
+        {"k":"line","points":[[300,137],[397,137]],"role":"code"},
+        {"k":"line","points":[[700,39],[777,39]],"role":"logic"},
+        {"k":"line","points":[[700,137],[777,137]],"role":"logic"}
+      ]
     }
   ]
 }
-
