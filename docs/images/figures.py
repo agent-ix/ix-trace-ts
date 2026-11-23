@@ -6,6 +6,10 @@ Regenerate from the repository root with the agent-ix/dev-tools skill:
     python3 -m pip install fonttools
     python3 <dev-tools>/skills/docs-figures/scripts/render.py docs/images/figures.py
 
+Only the entries figure is defined here: its export lists and import conditions are read from
+the sources, which ixd-figures cannot yet express (list extraction and conditional text). The hero
+figure is defined in docs/images/figures.json and rendered by `make figures`.
+
 Add --check to confirm the committed SVGs are current. Values are read from this
 repository: package.json, src/trace.ts, src/vitest.ts, src/index.ts and src/implementing.ts (the root entry's imports).
 """
@@ -21,9 +25,6 @@ STYLE = "ix-docs"
 ROOT = Path(__file__).resolve().parents[2]
 
 PACKAGE = json.loads((ROOT / "package.json").read_text())
-TRACE_SRC = (ROOT / "src" / "trace.ts").read_text()
-EMIT_ENV = re.search(r'EMIT_ENV = "([A-Z_]+)"', TRACE_SRC).group(1)
-META_KEY = re.search(r'TRACE_META_KEY = "(\w+)"', TRACE_SRC).group(1)
 EXPORTS = PACKAGE["exports"]
 PEER = PACKAGE["peerDependencies"]["vitest"]
 IMPLEMENTING_SRC = (ROOT / "src" / "implementing.ts").read_text()
@@ -46,38 +47,6 @@ def exported(path):
 
 ROOT_NAMES = exported("src/index.ts")
 VITEST_NAMES = exported("src/vitest.ts")
-
-ROLES = [
-    ("code", "test source", "box"),
-    ("logic", "processing step", "box"),
-    ("model", "JUnit result", "box"),
-    ("evidence", "outcome", "box"),
-]
-
-
-def hero():
-    """trace() in a test body reaches the JUnit file through the reporter."""
-    f = Figure(
-        "hero",
-        980,
-        150,
-        f"With {EMIT_ENV}=1, trace(\"FR-001-AC-1\") in a vitest test stores the id on the test's "
-        f"meta under {META_KEY}. TraceReporter reads it when the run ends and writes it to the "
-        f"JUnit file as a trace property on that test case.",
-    )
-    cy = 62
-    f.box(0, cy - 34, 220, 68, "code", "vitest test", 'trace("FR-001-AC-1")', "in the test body")
-    f.box(290, cy - 34, 190, 68, "logic", "test meta", META_KEY, "set while running")
-    f.box(540, cy - 34, 190, 68, "logic", "TraceReporter", "onTestRunEnd", f"{EMIT_ENV}=1")
-    f.box(790, cy - 34, 190, 68, "model", "junit.xml", '<property name="trace"', 'value="FR-001-AC-1"/>')
-    f.line([(220, cy), (287, cy)], "code")
-    f.note(228, cy - 9, "id", "code")
-    f.line([(480, cy), (537, cy)], "logic")
-    f.note(488, cy - 9, "ids", "logic")
-    f.line([(730, cy), (787, cy)], "logic", weight=2.4)
-    f.note(740, cy - 9, "xml", "logic")
-    f.legend(0, 138, ROLES[:3])
-    return f
 
 
 def entries():
@@ -106,4 +75,4 @@ def entries():
     return f
 
 
-FIGURES = [hero, entries]
+FIGURES = [entries]

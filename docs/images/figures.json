@@ -1,0 +1,27 @@
+{
+  "data": {
+    "emit": {"from":"regex","path":"src/trace.ts","pattern":"EMIT_ENV = \"([A-Z_]+)\";"},
+    "meta": {"from":"regex","path":"src/trace.ts","pattern":"TRACE_META_KEY = \"(\\w+)\";"}
+  },
+  "figures": [
+    {
+      "id": "hero",
+      "width": 980, "height": 150,
+      "label": "With {emit}=1, trace(\"FR-001-AC-1\") in a vitest test stores the id on the test's meta under {meta}. TraceReporter reads it when the run ends and writes it to the JUnit file as a trace property on that test case.",
+      "items": [
+        {"k":"box","at":[0,28,220,68],"role":"code","title":"vitest test","subs":["trace(\"FR-001-AC-1\")","in the test body"]},
+        {"k":"box","at":[290,28,190,68],"role":"logic","title":"test meta","subs":["{meta}","set while running"]},
+        {"k":"box","at":[540,28,190,68],"role":"logic","title":"TraceReporter","subs":["onTestRunEnd","{emit}=1"]},
+        {"k":"box","at":[790,28,190,68],"role":"model","title":"junit.xml","subs":["<property name=\"trace\"","value=\"FR-001-AC-1\"/>"]},
+        {"k":"line","points":[[220,62],[287,62]],"role":"code"},
+        {"k":"note","at":[228,53],"text":"id","role":"code"},
+        {"k":"line","points":[[480,62],[537,62]],"role":"logic"},
+        {"k":"note","at":[488,53],"text":"ids","role":"logic"},
+        {"k":"line","points":[[730,62],[787,62]],"role":"logic","weight":2.4},
+        {"k":"note","at":[740,53],"text":"xml","role":"logic"},
+        {"k":"legend","at":[0,138],"entries":[["code","test source","box"],["logic","processing step","box"],["model","JUnit result","box"]]}
+      ]
+    }
+  ]
+}
+
